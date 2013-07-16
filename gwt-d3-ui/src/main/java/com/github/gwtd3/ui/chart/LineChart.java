@@ -36,6 +36,8 @@ import com.github.gwtd3.api.core.Selection;
 import com.github.gwtd3.api.core.Value;
 import com.github.gwtd3.api.functions.DatumFunction;
 import com.github.gwtd3.api.scales.LinearScale;
+import com.github.gwtd3.ui.chart.renderer.LineRenderer;
+import com.github.gwtd3.ui.chart.renderer.Renderer;
 import com.github.gwtd3.ui.data.DefaultSelectionUpdater;
 import com.github.gwtd3.ui.data.SelectionDataJoiner;
 import com.github.gwtd3.ui.event.SerieAddedEvent;
@@ -46,10 +48,9 @@ import com.github.gwtd3.ui.event.SerieRemovedEvent;
 import com.github.gwtd3.ui.event.SerieRemovedEvent.SerieRemovedHandler;
 import com.github.gwtd3.ui.model.AxisCoordsBuilder;
 import com.github.gwtd3.ui.model.LineChartModel;
+import com.github.gwtd3.ui.model.NamedRange;
 import com.github.gwtd3.ui.model.PointBuilder;
-import com.github.gwtd3.ui.model.RangeDomainFilter;
 import com.github.gwtd3.ui.model.Serie;
-import com.github.gwtd3.ui.model.Serie.NamedRange;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.resources.client.CssResource.ImportedWithPrefix;
@@ -62,7 +63,8 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * <p>
  * You can configure the chart behaviour using {@link #options()}.
  * <p>
- * User is able by default to navigate accross the X dimension domain. Call {@link Options#enableXNavigation(boolean)} with false to disable it.
+ * User is able by default to navigate accross the X dimension domain. Call {@link Options#enableXNavigation(boolean)}
+ * with false to disable it.
  * <p>
  * FIXME: styling lines (colors, etc...) FIXME: styling serie label (position, font, etc...)
  * 
@@ -79,238 +81,224 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * @param <T>
  */
 public class LineChart<T> extends BaseChart<T> implements SerieAddedHandler<T>, SerieRemovedHandler<T>,
-		SerieChangeHandler<T> {
+        SerieChangeHandler<T> {
 
-	// ========== Resources and Styles classes =====================
+    // ========== Resources and Styles classes =====================
 
-	private static Resources createDefaultResources() {
-		return GWT.create(Resources.class);
-	}
+    private static Resources createDefaultResources() {
+        return GWT.create(Resources.class);
+    }
 
-	public static interface Resources extends BaseChart.Resources {
-		@Override
-		@Source("LineChart.css")
-		LineChart.Styles chartStyles();
-	}
+    public static interface Resources extends BaseChart.Resources {
+        @Override
+        @Source("LineChart.css")
+        LineChart.Styles chartStyles();
+    }
 
-	// public static interface XAxisResources extends ChartAxis.Resources {
-	// @Source("ChartAxis.css")
-	// ChartAxis.Styles xStyles();
-	// }
-	//
-	// public static interface YAxisResources extends ChartAxis.Resources {
-	// @Source("ChartAxis.css")
-	// ChartAxis.Styles yStyles();
-	// }
+    // public static interface XAxisResources extends ChartAxis.Resources {
+    // @Source("ChartAxis.css")
+    // ChartAxis.Styles xStyles();
+    // }
+    //
+    // public static interface YAxisResources extends ChartAxis.Resources {
+    // @Source("ChartAxis.css")
+    // ChartAxis.Styles yStyles();
+    // }
 
-	@ImportedWithPrefix("d3-line-chart")
-	public static interface Styles extends BaseChart.Styles {
+    @ImportedWithPrefix("d3-line-chart")
+    public static interface Styles extends BaseChart.Styles {
 
-		/**
-		 * will be applied to any line serie.
-		 * 
-		 * @return
-		 */
-		public String line();
+        /**
+         * will be applied to any line serie.
+         * 
+         * @return
+         */
+        public String line();
 
-		/**
-		 * a classna;e applied to series lines.
-		 * 
-		 * @return
-		 */
-		public String serie();
+        /**
+         * a classna;e applied to series lines.
+         * 
+         * @return
+         */
+        public String serie();
 
-		/**
-		 * class applied to range of values defined in any {@link NamedRange}.
-		 * 
-		 * @return the named class
-		 */
-		public String namedRange();
+        /**
+         * class applied to range of values defined in any {@link NamedRange}.
+         * 
+         * @return the named class
+         */
+        public String namedRange();
 
-	}
+    }
 
-	/**
-	 * The model defining this chart
-	 */
-	private LineChartModel<T, LinearScale> model;
+    /**
+     * The model defining this chart
+     */
+    private LineChartModel<T, LinearScale> model;
 
-	private LineChart.Styles styles;
+    private LineChart.Styles styles;
 
-	private PointBuilder<T> pointBuilder;
+    private PointBuilder<T> pointBuilder;
 
-	private PointBuilder<T> domainBuilder;
+    public LineChart(final LineChartModel<T, LinearScale> model) {
+        this(model, createDefaultResources());
+    }
 
-	public LineChart(final PointBuilder<T> domainBuilder) {
-		this(domainBuilder, createDefaultResources());
-	}
+    public LineChart(final LineChartModel<T, LinearScale> model, final Resources resources) {
+        super(model, resources);
+        // getElement().setAttribute("viewBox", "0 0 500 400");
+        styles = resources.chartStyles();
+        styles.ensureInjected();
 
-	public LineChart(final PointBuilder<T> domainBuilder, final Resources resources) {
-		super(resources);
-		this.domainBuilder = domainBuilder;
-		// getElement().setAttribute("viewBox", "0 0 500 400");
-		styles = resources.chartStyles();
-		styles.ensureInjected();
+        this.model = model;
+        // new LineChartModel<T, LinearScale>(xModel, yModel, domainBuilder);
+    }
 
-		this.model = new LineChartModel<T, LinearScale>(xModel, yModel, domainBuilder);
-	}
+    // ============== initialization ========================
+    @Override
+    protected void initModel() {
+        super.initModel();
 
-	@Override
-	protected void initModel() {
-		super.initModel();
+        this.model.addSerieAddedHandler(this);
+        this.model.addSerieRemovedHandler(this);
 
-		this.model.addSerieAddedHandler(this);
-		this.model.addSerieRemovedHandler(this);
+        // listens for range changed
 
-		// listens for range changed
+        pointBuilder = new AxisCoordsBuilder<T>(xModel, yModel, model.coordsBuilder());
+    }
 
-		pointBuilder = new AxisCoordsBuilder<T>(xModel, yModel, domainBuilder);
-	}
+    // ==================== redraw methods ================
 
-	// ============== initialization ========================
+    private final Map<Serie<T>, Renderer<T>> renderers = new HashMap<Serie<T>, Renderer<T>>();
 
-	// ==================== redraw methods ================
+    public void registerLineSerieRenderer(Serie<T> serie, PointBuilder<T> domainBuilder) {
+        LineRenderer<T> renderer = new LineRenderer<T>(
+                domainBuilder, xModel, yModel,
+                getSerieClipPath(), g.getElement(),
+                styles.serie(),
+                styles.line());
+        // store internally
+        renderers.put(serie, renderer);
+    }
 
-	@Override
-	protected void redrawSeries() {
-		super.redrawSeries();
+    private Renderer<T> getRenderer(Serie<T> serie) {
+        return renderers.get(serie);
+    }
 
-		// create a drawer for the series
-		DefaultSelectionUpdater<Serie<T>> serieDrawer = new DefaultSelectionUpdater<Serie<T>>("." + styles.serie()) {
-			// create a path
-			@Override
-			public String getElementName() {
-				return "path";
-			}
+    @Override
+    protected void redrawSeries() {
+        super.redrawSeries();
 
-			@Override
-			public String getKey(final Serie<T> datum, final int index) {
-				return datum.id();
-			}
+        List<Serie<T>> series = model().series();
+        for (Serie<T> serie : series) {
+            Renderer<T> renderer = getRenderer(serie);
+            if (renderer == null) {
+                GWT.log("no renderer defined for the serie " + serie.id());
+            }
+            else {
+                renderer.render(serie);
+            }
+        }
 
-			// add the .line class to the newly created path
-			@Override
-			public void afterEnter(final Selection selection) {
-				super.afterEnter(selection);
-				selection.classed(styles.line(), true);
-				selection.classed(styles.serie(), true);
-				// apply clip path
-				getSerieClipPath().apply(selection);
-			}
+        // 2. NamedRanges
+        // update the selection with a path for each NamedRange in a serie
 
-			// update the d attribute
-			@Override
-			public void onJoinEnd(final Selection selection) {
-				super.onJoinEnd(selection);
-				// setting the attribute d of the path
-				selection.attr("d", new DatumFunction<String>() {
-					@SuppressWarnings("unchecked")
-					@Override
-					public String apply(final Element context, final Value d, final int index) {
-						Serie<T> serie = d.<Serie<T>> as();
-						List<T> values = serie.getValues();
-						LineGenerator<T> generator =
-								new LineGenerator<T>(
-										pointBuilder,
-										new RangeDomainFilter<T>(domainBuilder,
-												xModel));
-						return generator.generate(values);
-					}
-				});
+        DefaultSelectionUpdater<NamedRange<T>> namedRangeDrawer =
+                new DefaultSelectionUpdater<NamedRange<T>>("." + styles.namedRange()) {
+                    // create a path
+                    @Override
+                    public String getElementName() {
+                        return "path";
+                    }
 
-			}
+                    @Override
+                    public String getKey(final NamedRange<T> datum, final int index) {
+                        return datum.serie().id() + "." + datum.id();
+                    }
 
-		};
-		// create, update (and remove), a path element for each serie
-		SelectionDataJoiner.update(
-				g.select(), // inside the root G
-				model.series(),// the data is the series
-				serieDrawer
-				);
+                    // add the .namedRange class to the newly created
+                    @Override
+                    public void afterEnter(final Selection selection) {
+                        super.afterEnter(selection);
+                        selection.classed(styles.line(), true);
+                        selection.classed(styles.namedRange(), true);
+                        getSerieClipPath().apply(selection);
+                    }
 
-		// update the selection with a path for each named range in a serie
-		DefaultSelectionUpdater<Serie<T>.NamedRange> namedRangeDrawer =
-				new DefaultSelectionUpdater<Serie<T>.NamedRange>("." + styles.namedRange()) {
-					// create a path
-					@Override
-					public String getElementName() {
-						return "path";
-					}
+                    // update the d attribute
+                    @Override
+                    public void onJoinEnd(final Selection selection) {
+                        super.onJoinEnd(selection);
+                        // setting the attribute d of the path
+                        selection.attr("d", new DatumFunction<String>() {
+                            @Override
+                            public String apply(final Element context, final Value d, final int index) {
+                                NamedRange<T> namedRange = d.<NamedRange<T>> as();
+                                // filter the points with the range
+                                LineGenerator<T> lineGenerator = new LineGenerator<T>(pointBuilder, namedRange);
+                                return lineGenerator.generate(namedRange.getValues());
+                            }
+                        });
+                    }
 
-					@Override
-					public String getKey(final Serie<T>.NamedRange datum, final int index) {
-						return datum.serie().id() + "." + datum.id();
-					}
+                };
+        // // create, update (and remove), a path element for each serie
+        // SelectionDataJoiner.update(
+        // g.select(), // inside the root G
+        // model.series(),// the data is the series
+        // serieDrawer
+        // );
 
-					// add the .namedRange class to the newly created
-					@Override
-					public void afterEnter(final Selection selection) {
-						super.afterEnter(selection);
-						selection.classed(styles.line(), true);
-						selection.classed(styles.namedRange(), true);
-						getSerieClipPath().apply(selection);
-					}
+        // create, update (and remove), a path element for each named range of each serie
+        series = model.series();
+        for (Serie<T> serie : series) {
+            List<NamedRange<T>> ranges = serie.getOverlappingRanges(xModel.visibleDomain());
+            // draw with the appropriate renderer
+            GWT.log("named ranges count:" + ranges.size());
+            SelectionDataJoiner.update(g.select(), ranges, namedRangeDrawer);
+        }
 
-					// update the d attribute
-					@Override
-					public void onJoinEnd(final Selection selection) {
-						super.onJoinEnd(selection);
-						// setting the attribute d of the path
-						selection.attr("d", new DatumFunction<String>() {
-							@Override
-							public String apply(final Element context, final Value d, final int index) {
-								Serie<T>.NamedRange namedRange = d.<Serie<T>.NamedRange> as();
-								// filter the points with the range
-								LineGenerator<T> lineGenerator = new LineGenerator<T>(pointBuilder, namedRange);
-								return lineGenerator.generate(namedRange.getValues());
-							}
-						});
-					}
+    }
 
-				};
-		// create, update (and remove), a path element for each named range of each serie
-		List<Serie<T>> series = model.series();
-		for (Serie<T> serie : series) {
-			List<Serie<T>.NamedRange> ranges = serie.getOverlappingRanges(xModel.visibleDomain());
-			GWT.log("named ranges count:" + ranges.size());
-			SelectionDataJoiner.update(g.select(), ranges, namedRangeDrawer);
-		}
+    // ============= getters =============
 
-	}
+    protected LineChart.Styles styles() {
+        return styles;
+    }
 
-	// ============= getters =============
+    /**
+     * Return the model driving this chart.
+     * 
+     * @return the model
+     */
+    public LineChartModel<T, LinearScale> model() {
+        return model;
+    }
 
-	protected LineChart.Styles styles() {
-		return styles;
-	}
+    // =========== listens to model events ==============
 
-	public LineChartModel<T, LinearScale> model() {
-		return model;
-	}
+    Map<Serie<T>, HandlerRegistration> serieChangeRegistrations = new HashMap<Serie<T>, HandlerRegistration>();
 
-	// =========== listens to model events ==============
+    @Override
+    public void onSerieRemoved(final SerieRemovedEvent<T> event) {
+        HandlerRegistration registration = serieChangeRegistrations.remove(event.getSerie());
+        if (registration != null) {
+            registration.removeHandler();
+        }
+        redrawSeries();
+    }
 
-	Map<Serie<T>, HandlerRegistration> serieChangeRegistrations = new HashMap<Serie<T>, HandlerRegistration>();
+    @Override
+    public void onSerieAdded(final SerieAddedEvent<T> event) {
+        // attach listener on the serie
+        serieChangeRegistrations.put(event.getSerie(), event.getSerie().addSerieChangeHandler(this));
+        redrawSeries();
+    }
 
-	@Override
-	public void onSerieRemoved(final SerieRemovedEvent<T> event) {
-		HandlerRegistration registration = serieChangeRegistrations.remove(event.getSerie());
-		if (registration != null) {
-			registration.removeHandler();
-		}
-		redrawSeries();
-	}
-
-	@Override
-	public void onSerieAdded(final SerieAddedEvent<T> event) {
-		// attach listener on the serie
-		serieChangeRegistrations.put(event.getSerie(), event.getSerie().addSerieChangeHandler(this));
-		redrawSeries();
-	}
-
-	@Override
-	public void onSerieChange(final SerieChangeEvent<T> event) {
-		// TODO: find a way to redraw only the serie that changed
-		redrawSeries();
-	}
+    @Override
+    public void onSerieChange(final SerieChangeEvent<T> event) {
+        // TODO: find a way to redraw only the serie that changed
+        redrawSeries();
+    }
 
 }

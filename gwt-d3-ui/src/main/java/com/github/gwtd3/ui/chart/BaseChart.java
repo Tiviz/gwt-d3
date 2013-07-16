@@ -39,6 +39,7 @@ import com.github.gwtd3.ui.data.SelectionDataJoiner;
 import com.github.gwtd3.ui.event.RangeChangeEvent;
 import com.github.gwtd3.ui.event.RangeChangeEvent.RangeChangeHandler;
 import com.github.gwtd3.ui.model.AxisModel;
+import com.github.gwtd3.ui.model.BaseChartModel;
 import com.github.gwtd3.ui.svg.GContainer;
 import com.github.gwtd3.ui.svg.SVGDocumentContainer;
 import com.github.gwtd3.ui.svg.SVGResources;
@@ -48,6 +49,7 @@ import com.google.gwt.user.client.Random;
 
 /**
  * A base class for a chart with one horizontal axis and one vertical axis.
+ * <p>
  * 
  * @author SCHIOCA
  * 
@@ -60,9 +62,9 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
     protected static final int DEFAULT_LEFT_POSITION = 35;
     protected static final int DEFAULT_RIGHT_POSITION = 15;
 
-    protected final AxisModel<LinearScale> xModel = AxisModel.createLinear();
+    protected final AxisModel<LinearScale> xModel;
 
-    protected final AxisModel<LinearScale> yModel = AxisModel.createLinear();
+    protected final AxisModel<LinearScale> yModel;
 
     private ChartAxis<? extends Scale<?>> xAxis;
 
@@ -143,12 +145,15 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
         public String x();
     }
 
-    public BaseChart() {
-        this((Resources) GWT.create(Resources.class));
+    public BaseChart(BaseChartModel<T, LinearScale> model) {
+        this(model, (Resources) GWT.create(Resources.class));
     }
 
-    public BaseChart(final Resources resources) {
+    public BaseChart(BaseChartModel<T, LinearScale> model, final Resources resources) {
         super(resources);
+
+        xModel = model.xModel();
+        yModel = model.yModel();
 
         // getElement().setAttribute("viewBox", "0 0 500 400");
         styles = resources.chartStyles();

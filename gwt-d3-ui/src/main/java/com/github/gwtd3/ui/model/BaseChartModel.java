@@ -61,10 +61,20 @@ public class BaseChartModel<T, S extends Scale<S>> implements HasHandlers {
 
     // =========== delegate models ================
 
+    /**
+     * Return the model of the x-axis.
+     * 
+     * @return the model
+     */
     public AxisModel<S> xModel() {
         return xModel;
     }
 
+    /**
+     * Return the model of the y-axis.
+     * 
+     * @return the model
+     */
     public AxisModel<S> yModel() {
         return yModel;
     }

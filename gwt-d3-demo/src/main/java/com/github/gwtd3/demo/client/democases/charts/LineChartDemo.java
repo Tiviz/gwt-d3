@@ -34,6 +34,7 @@ import com.github.gwtd3.api.D3;
 import com.github.gwtd3.api.arrays.Array;
 import com.github.gwtd3.api.core.Value;
 import com.github.gwtd3.api.functions.DatumFunction;
+import com.github.gwtd3.api.scales.LinearScale;
 import com.github.gwtd3.demo.client.DemoCase;
 import com.github.gwtd3.demo.client.Factory;
 import com.github.gwtd3.demo.client.democases.test.Data;
@@ -42,7 +43,9 @@ import com.github.gwtd3.ui.Slider;
 import com.github.gwtd3.ui.chart.LineChart;
 import com.github.gwtd3.ui.event.RangeChangeEvent;
 import com.github.gwtd3.ui.event.RangeChangeEvent.RangeChangeHandler;
+import com.github.gwtd3.ui.model.AxisModel;
 import com.github.gwtd3.ui.model.BasePointBuilder;
+import com.github.gwtd3.ui.model.LineChartModel;
 import com.google.common.collect.Range;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -89,7 +92,10 @@ public class LineChartDemo extends Composite implements DemoCase {
     }
 
     private void createChart() {
-        this.chart = new LineChart<Data>(point);
+
+        LineChartModel<Data, LinearScale> model =
+                new LineChartModel<Data, LinearScale>(AxisModel.createLinear(), AxisModel.createLinear(), point);
+        this.chart = new LineChart<Data>(model);
         // configure
         chart.xAxis().formatter(new DatumFunction<String>() {
             @Override

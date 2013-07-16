@@ -98,10 +98,28 @@ public class AxisModel<S extends Scale<S>> implements RangeChangeHasHandlers {
     // ============= events handling ==================
 
     /**
-     * @return the domain of the
+     * Return the domain of the axis as a {@link Range} object.
+     * @return the domain range
      */
     public Range<Double> visibleDomain() {
         return Range.closed(scale.domain().getNumber(0), scale.domain().getNumber(1));
+    }
+
+    /**
+     * Return the length of the visible domain, that is,
+     * the "distance" between the upper and lower bounds of the domain,
+     * as a positive double:
+     * 
+     * <pre>
+     * {@code 
+     * (Math.abs(upper-lower)).
+     * }
+     * </pre>
+     * 
+     * @return the length
+     */
+    public double visibleDomainLength() {
+        return Math.abs(scale.domain().getNumber(0) - scale.domain().getNumber(1));
     }
 
     /**
