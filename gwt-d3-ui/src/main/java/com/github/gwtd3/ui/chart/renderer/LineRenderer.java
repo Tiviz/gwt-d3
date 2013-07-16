@@ -1,8 +1,7 @@
 package com.github.gwtd3.ui.chart.renderer;
 
-import java.util.List;
-
 import com.github.gwtd3.api.D3;
+import com.github.gwtd3.api.core.Selection;
 import com.github.gwtd3.ui.chart.ClipPath;
 import com.github.gwtd3.ui.chart.LineGenerator;
 import com.github.gwtd3.ui.model.AxisCoordsBuilder;
@@ -11,45 +10,46 @@ import com.github.gwtd3.ui.model.PointBuilder;
 import com.github.gwtd3.ui.model.RangeDomainFilter;
 import com.github.gwtd3.ui.model.Serie;
 import com.github.gwtd3.ui.svg.DOM;
+import com.google.common.collect.Range;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.Random;
 
 public class LineRenderer<T> implements Renderer<T> {
 
-    private final PointBuilder<T> domainBuilder;
-
-    private final PointBuilder<T> pointBuilder;
-
-    private final ClipPath clipPath;
-
-    private final AxisModel<?> xModel;
-
     private final Element container;
+    private final LineGenerator<T> generator;
+    private final AxisModel<?> xModel;
+    private final AxisModel<?> yModel;
 
-    private final String classNameSpecifier;
+    private String additionalClassNames = "";
+    private ClipPath clipPath;
 
-    private final String additionalClassNames;
-
-    public LineRenderer(PointBuilder<T> domainBuilder, AxisModel<?> xModel, AxisModel<?> yModel, ClipPath clipPath, Element container, String classNameSpecifier, String additionalClassNames) {
+    public LineRenderer(final PointBuilder<T> domainBuilder,
+            final AxisModel<?> xModel, final AxisModel<?> yModel,
+            final ClipPath clipPath, final Element container) {
         super();
         this.xModel = xModel;
-        this.domainBuilder = domainBuilder;
-        this.pointBuilder = new AxisCoordsBuilder<T>(xModel, yModel, domainBuilder);
+        this.yModel = yModel;
         this.clipPath = clipPath;
         this.container = container;
-        this.classNameSpecifier = classNameSpecifier;
-        this.additionalClassNames = additionalClassNames;
+        AxisCoordsBuilder<T> pointBuilder = new AxisCoordsBuilder<T>(xModel, yModel, domainBuilder);
+        this.generator =
+                new LineGenerator<T>(
+                        pointBuilder,
+                        new RangeDomainFilter<T>(domainBuilder,
+                                xModel));
     }
 
     @Override
-    public void render(Serie<T> serie) {
+    public void render(final Serie<T> serie) {
         // create or get a path element
         Element path = getOrCreatePathElement(serie);
         configurePathElement(path);
-        path.setAttribute("d", computePathDataAttribute(serie));
+        path.setAttribute("d", generator.generate(serie.getValues()));
 
     }
 
-    private Element getOrCreatePathElement(Serie<T> serie) {
+    private Element getOrCreatePathElement(final Serie<T> serie) {
         Element e = findPath(serie);
         if (e == null) {
             e = createPath(serie);
@@ -57,32 +57,62 @@ public class LineRenderer<T> implements Renderer<T> {
         return e;
     }
 
-    private Element createPath(Serie<T> serie) {
+    private Element createPath(final Serie<T> serie) {
         Element pathElement = DOM.createSVGElement("path");
+        pathElement.setAttribute("name", "serie_" + serie.id());
         container.appendChild(pathElement);
-        container.setAttribute("name", "serie_" + serie.id());
         return pathElement;
     }
 
-    private Element findPath(Serie<T> serie) {
-        return D3.select(container).select("[name=serie_" + serie.id() + "]").node();
+    private Element findPath(final Serie<T> serie) {
+        return D3.select(container).select("[name=\"serie_" + serie.id() + "\"]").node();
     }
 
-    private void configurePathElement(Element e) {
-        e.addClassName(additionalClassNames);
-        e.addClassName(classNameSpecifier);
-        clipPath.apply(e);
+    private void configurePathElement(final Element e) {
+        // apply the cli path and the class names
+        Selection select = D3.select(e);
+        if (additionalClassNames != null) {
+            select.classed(additionalClassNames, true);
+        }
+        clipPath.apply(select);
     }
 
-    private String computePathDataAttribute(Serie<T> serie) {
-        List<T> values = serie.getValues();
-        // generate the "d" attribute with a linegenerator
-        LineGenerator<T> generator =
-                new LineGenerator<T>(
-                        pointBuilder,
-                        new RangeDomainFilter<T>(domainBuilder,
-                                xModel));
-        return generator.generate(values);
+    /**
+     * Create a rectangular clip path that draw only the part of the lines
+     * included in the given range.
+     * <p>
+     * The given range is expressed in terms of x domain space.
+     * <p>
+     * 
+     * 
+     * @param includedRange
+     */
+    public LineRenderer<T> include(final Range<Double> includedRange) {
+        // add a clip path in the container
+        Selection inclusionClipPath =
+                D3.select(container)
+                        .append("clipPath")
+                        .attr("id", "clip" + Random.nextInt(100000));
+        // clip this clippath with the global clipath
+        clipPath.apply(inclusionClipPath);
+        double extent = Math.abs(includedRange.lowerEndpoint() - includedRange.upperEndpoint());
+        inclusionClipPath.append("rect")
+                .attr("x", xModel.toPixel(includedRange.lowerEndpoint()))
+                .attr("y", 0)
+                .attr("width", xModel.toPixelSize(extent))
+                .attr("height", yModel.toPixelSize(yModel.visibleDomainLength()));
+        // set the inclusion clip path to be applied on the serie at next redraw
+        clipPath = new ClipPath(inclusionClipPath.attr("id"));
+        return this;
     }
 
+    /**
+     * Specify styleNames to be applied to the generated path lines
+     * @param names
+     * @return
+     */
+    public LineRenderer<T> addStyleNames(final String names) {
+        this.additionalClassNames += " " + names;
+        return this;
+    }
 }

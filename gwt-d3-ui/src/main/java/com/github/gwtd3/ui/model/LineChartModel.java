@@ -43,40 +43,20 @@ import com.github.gwtd3.ui.event.SerieAddedEvent.SerieAddedHasHandlers;
 import com.github.gwtd3.ui.event.SerieRemovedEvent;
 import com.github.gwtd3.ui.event.SerieRemovedEvent.SerieRemovedHandler;
 import com.github.gwtd3.ui.event.SerieRemovedEvent.SerieRemovedHasHandlers;
-import com.google.common.base.Preconditions;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class LineChartModel<T, S extends Scale<S>> extends BaseChartModel<T, S> implements SerieAddedHasHandlers<T>,
         SerieRemovedHasHandlers<T> {
 
-    /**
-     * Used to convert instance of T to x and y domain values.
-     * 
-     */
-    private PointBuilder<T> coordsBuilder;
-
     private final Map<String, Serie<T>> series = new HashMap<String, Serie<T>>();
 
-    public static <X, Y extends Scale<Y>> LineChartModel<X, Y> create(final AxisModel<Y> xModel,
-            final AxisModel<Y> yModel, final PointBuilder<X> coordsBuilder) {
-        return new LineChartModel<X, Y>(xModel, yModel, coordsBuilder);
-    }
-
-    public LineChartModel(final AxisModel<S> xModel, final AxisModel<S> yModel, final PointBuilder<T> coordsBuilder) {
+    public LineChartModel(final AxisModel<S> xModel, final AxisModel<S> yModel) {
         super(xModel, yModel);
-        this.coordsBuilder = coordsBuilder;
-
     }
 
-    // =========== coords builder ================
-
-    public BaseChartModel<T, S> coordsBuilder(final PointBuilder<T> pointBuilder) {
-        this.coordsBuilder = pointBuilder;
-        return this;
-    }
-
-    public PointBuilder<T> coordsBuilder() {
-        return coordsBuilder;
+    public static <X, Y extends Scale<Y>> LineChartModel<X, Y> create(final AxisModel<Y> xModel,
+            final AxisModel<Y> yModel) {
+        return new LineChartModel<X, Y>(xModel, yModel);
     }
 
     // =========== series methods ================
@@ -107,10 +87,9 @@ public class LineChartModel<T, S extends Scale<S>> extends BaseChartModel<T, S> 
      * @return
      */
     public Serie<T> serie(final String id) {
-        Preconditions.checkNotNull(coordsBuilder, "please define the PointBuilder first");
         Serie<T> serie = this.series.get(id);
         if (serie == null) {
-            serie = new Serie<T>(id, coordsBuilder);
+            serie = new Serie<T>(id);
             this.series.put(id, serie);
             fireEvent(new SerieAddedEvent<T>(serie));
         }

@@ -48,7 +48,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Random;
 
 /**
- * A base class for a chart with one horizontal axis and one vertical axis.
+ * A base class for a chart with one horizontal axis and one vertical axis,
+ * and a data region.
  * <p>
  * 
  * @author SCHIOCA
@@ -84,7 +85,7 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
     // ==== children =========
     protected GContainer g;
 
-    private ClipPath clipPath;
+    private ClipPath dataRegionClipPath;
 
     /**
      * Configure the chart.
@@ -145,11 +146,11 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
         public String x();
     }
 
-    public BaseChart(BaseChartModel<T, LinearScale> model) {
+    public BaseChart(final BaseChartModel<T, LinearScale> model) {
         this(model, (Resources) GWT.create(Resources.class));
     }
 
-    public BaseChart(BaseChartModel<T, LinearScale> model, final Resources resources) {
+    public BaseChart(final BaseChartModel<T, LinearScale> model, final Resources resources) {
         super(resources);
 
         xModel = model.xModel();
@@ -159,7 +160,7 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
         styles = resources.chartStyles();
         styles.ensureInjected();
 
-        clipPath = new ClipPath("clip" + Random.nextInt(100000));
+        dataRegionClipPath = new ClipPath("clip" + Random.nextInt(100000));
 
         createChildren();
     }
@@ -229,8 +230,8 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
     }
 
     private void redrawClippath() {
-        SelectionDataJoiner.update(g.select(), Arrays.asList(clipPath),
-                new DefaultSelectionUpdater<ClipPath>("#" + clipPath.getId()) {
+        SelectionDataJoiner.update(g.select(), Arrays.asList(dataRegionClipPath),
+                new DefaultSelectionUpdater<ClipPath>("#" + dataRegionClipPath.getId()) {
                     @Override
                     public String getElementName() {
                         return "clipPath";
@@ -239,7 +240,7 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
                     @Override
                     public void afterEnter(final Selection selection) {
                         super.afterEnter(selection);
-                        selection.attr("id", clipPath.getId())
+                        selection.attr("id", dataRegionClipPath.getId())
                                 .append("rect");
                     }
 
@@ -325,7 +326,7 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
 
     @Override
     public ClipPath getSerieClipPath() {
-        return clipPath;
+        return dataRegionClipPath;
     }
 
     /**
