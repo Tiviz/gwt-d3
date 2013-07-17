@@ -28,6 +28,8 @@
  */
 package com.github.gwtd3.ui.chart.renderer;
 
+import java.util.Arrays;
+
 import com.github.gwtd3.api.D3;
 import com.github.gwtd3.api.core.Selection;
 import com.github.gwtd3.ui.chart.ClipPath;
@@ -40,7 +42,6 @@ import com.github.gwtd3.ui.model.Serie;
 import com.github.gwtd3.ui.svg.DOM;
 import com.google.common.collect.Range;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.user.client.Random;
 
 public class LineRenderer<T> implements Renderer {
 
@@ -50,7 +51,8 @@ public class LineRenderer<T> implements Renderer {
     private final AxisModel<?> yModel;
 
     private String additionalClassNames = "";
-    private ClipPath clipPath;
+    private final ClipPath globalClipPath;
+    private ClipPath localClipPath;
 
     private final Serie<T> serie;
 
@@ -61,7 +63,7 @@ public class LineRenderer<T> implements Renderer {
         this.serie = serie;
         this.xModel = xModel;
         this.yModel = yModel;
-        this.clipPath = clipPath;
+        this.globalClipPath = clipPath;
         this.container = container;
         AxisCoordsBuilder<T> pointBuilder = new AxisCoordsBuilder<T>(xModel, yModel, domainBuilder);
         this.generator =
@@ -105,7 +107,16 @@ public class LineRenderer<T> implements Renderer {
         if (additionalClassNames != null) {
             select.classed(additionalClassNames, true);
         }
-        clipPath.apply(select);
+        applyClipPath(select);
+    }
+
+    private void applyClipPath(final Selection select) {
+        if (localClipPath != null) {
+            localClipPath.apply(select);
+        }
+        else {
+            globalClipPath.apply(select);
+        }
     }
 
     /**
@@ -119,21 +130,29 @@ public class LineRenderer<T> implements Renderer {
      * @param includedRange
      */
     public LineRenderer<T> include(final Range<Double> includedRange) {
-        // add a clip path in the container
+        String id = "clip" + serie.id();
+
+        // ENTER : create a clip path in the container (if needed)
         Selection inclusionClipPath =
                 D3.select(container)
+                        .selectAll("#" + id)
+                        .data(Arrays.asList(id))
+                        .enter()
                         .append("clipPath")
-                        .attr("id", "clip" + Random.nextInt(100000));
-        // clip this clippath with the global clipath
-        clipPath.apply(inclusionClipPath);
+                        .attr("id", id)
+                        .attr("clip-path", "url(#" + globalClipPath.getId() + ")")
+                        .append("rect");
+        // UPDATE the clip path
         double extent = Math.abs(includedRange.lowerEndpoint() - includedRange.upperEndpoint());
-        inclusionClipPath.append("rect")
+        inclusionClipPath
                 .attr("x", xModel.toPixel(includedRange.lowerEndpoint()))
                 .attr("y", 0)
                 .attr("width", xModel.toPixelSize(extent))
                 .attr("height", yModel.toPixelSize(yModel.visibleDomainLength()));
-        // set the inclusion clip path to be applied on the serie at next redraw
-        clipPath = new ClipPath(inclusionClipPath.attr("id"));
+        // store the id to be used when path will be drawed
+        if (localClipPath == null) {
+            localClipPath = new ClipPath(id);
+        }
         return this;
     }
 

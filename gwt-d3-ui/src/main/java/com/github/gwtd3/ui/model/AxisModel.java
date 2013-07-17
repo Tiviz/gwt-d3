@@ -228,9 +228,8 @@ public class AxisModel<S extends Scale<S>> implements RangeChangeHasHandlers {
      * @return the size in pixels of the domain segment
      */
     public int toPixelSize(final double domainSize) {
-        double domainPoint = (visibleDomain().lowerEndpoint() + Math.abs(domainSize));
-
-        return (int) Math.abs(toPixel(domainPoint) - scale.range().getNumber(0));
+        double domainRatio = domainSize / visibleDomainLength();
+        return (int) (Math.abs(scale.range().getNumber(0) - scale.range().getNumber(1)) * domainRatio);
     }
 
 }
