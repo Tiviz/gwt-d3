@@ -31,7 +31,7 @@ package com.github.gwtd3.api.scales;
 import com.github.gwtd3.api.arrays.Array;
 import com.github.gwtd3.api.core.Formatter;
 
-/**
+/** 
  * Linear scales are the most common scale, and a good default choice to map a continuous input domain to a continuous output range.
  * <p>
  * The mapping is linear in that the output range value y can be expressed as a linear function of the input domain value x: y = mx + b.

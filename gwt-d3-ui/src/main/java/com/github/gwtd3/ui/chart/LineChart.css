@@ -37,6 +37,7 @@
 .x path {
   display: none;
 }
+
 .y path {
 }
 
@@ -44,10 +45,15 @@
 	text-anchor: end;
 }
 
-.line {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 1px;
+/* default linerenderer style */
+path.serie{
+	fill:none;	
+	stroke: steelblue;
+	stroke-width: 1px;
+}
+
+rect.serie{
+	fill:steelblue;	
 }
 
 .label{
@@ -65,16 +71,7 @@
 }
 
 .tick{
-	
 }
 
 .serie{
-}
-
-.namedRange{
-	stroke-width: 2px;
-}
-
-.namedRange:hover{
-	stroke-width: 3px;
 }

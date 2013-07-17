@@ -26,55 +26,53 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.github.gwtd3.ui.chart;
-
-import com.github.gwtd3.api.core.Selection;
-import com.github.gwtd3.api.core.Value;
-import com.github.gwtd3.api.functions.DatumFunction;
-import com.google.gwt.dom.client.Element;
+package com.github.gwtd3.ui.model;
 
 /**
- * Represent a clip path in a SVG document.
- * <p>
- * 
+ * Converts an arbytrary T object into rectangular informations displayable
+ * on 2 secant axis.
+ * It delegates to a {@link RectBuilder} that can convert a object T into domain dimensions.
  * 
  * @author SCHIOCA
  * 
+ * @param <T>
  */
-public class ClipPath {
+public class AxisRectBuilder<T> implements RectBuilder<T> {
 
-    private final String id;
+    private final AxisModel<?> xModel;
+    private final AxisModel<?> yModel;
+    private final RectBuilder<T> domainBuilder;
 
-    public ClipPath(final String id) {
+    public AxisRectBuilder(final AxisModel<?> xModel, final AxisModel<?> yModel, final RectBuilder<T> domainBuilder) {
         super();
-        this.id = id;
+        this.xModel = xModel;
+        this.yModel = yModel;
+        this.domainBuilder = domainBuilder;
     }
 
-    public String getId() {
-        return id;
+    @Override
+    public double x(final T value) {
+        return xModel.toPixel(domainBuilder.x(value));
     }
 
-    /**
-     * Apply the clip path on the given node.
-     * 
-     * @param e
-     */
-    public void apply(final Element e) {
-        e.setAttribute("clip-path", "url(#" + getId() + ")");
+    @Override
+    public double y(final T value) {
+        return yModel.toPixel(domainBuilder.y(value));
     }
 
-    /**
-     * Apply the clip path on the elements of the selection.
-     * 
-     * @param e
-     */
-    public void apply(final Selection s) {
-        s.attr("clip-path", new DatumFunction<String>() {
-            @Override
-            public String apply(final Element context, final Value d, final int index) {
-                return "url(#" + getId() + ")";
-            }
-        });
+    @Override
+    public double width(final T value) {
+        return xModel.toPixelSize(domainBuilder.width(value));
+    }
+
+    @Override
+    public double height(final T value) {
+        return yModel.toPixelSize(domainBuilder.height(value));
+    }
+
+    @Override
+    public String styleNames(final T value) {
+        return domainBuilder.styleNames(value);
     }
 
 }

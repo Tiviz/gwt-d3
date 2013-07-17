@@ -111,7 +111,7 @@ public class Formatter extends JavaScriptObject implements IsFunction {
 	public final native String format(double d)/*-{
 		return this(d);
 	}-*/;
-
+ 
 	/**
 	 * Create a new instance of {@link Formatter}.
 	 * 

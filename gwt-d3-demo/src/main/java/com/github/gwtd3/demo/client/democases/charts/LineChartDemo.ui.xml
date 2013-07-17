@@ -35,11 +35,26 @@
 		.important {
 		}
 	</ui:style>
+	
+	<ui:style type="com.github.gwtd3.demo.client.democases.charts.LineChartDemo.Styles" field="styles"> 
+		rect.bar{
+			fill: #dd2277;
+			opacity: 0.5;
+		}
+		rect.path{
+		}
+		
+		path.partial{
+			stroke-width: 3px;
+
+		}
+	</ui:style>
+	
 	<g:HTMLPanel>
 		<g:HTMLPanel>
 			Visible X range:<gwtd3:Slider ui:field="xrange" min='0.0' max='500.0' value="0.0"/>
 			<g:CheckBox ui:field="highlight">Highlight part</g:CheckBox>
 		</g:HTMLPanel>
-		<c:LineChart ui:field="chart" width="500px" height="400px"/>
+		<c:LineChart ui:field="lineChart" width="800px" height="600px"/>
 	</g:HTMLPanel>
 </ui:UiBinder> 

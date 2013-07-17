@@ -39,6 +39,7 @@ import com.github.gwtd3.ui.data.SelectionDataJoiner;
 import com.github.gwtd3.ui.event.RangeChangeEvent;
 import com.github.gwtd3.ui.event.RangeChangeEvent.RangeChangeHandler;
 import com.github.gwtd3.ui.model.AxisModel;
+import com.github.gwtd3.ui.model.BaseChartModel;
 import com.github.gwtd3.ui.svg.GContainer;
 import com.github.gwtd3.ui.svg.SVGDocumentContainer;
 import com.github.gwtd3.ui.svg.SVGResources;
@@ -47,7 +48,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Random;
 
 /**
- * A base class for a chart with one horizontal axis and one vertical axis.
+ * A base class for a chart with one horizontal axis and one vertical axis,
+ * and a data region.
+ * <p>
  * 
  * @author SCHIOCA
  * 
@@ -60,9 +63,9 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
     protected static final int DEFAULT_LEFT_POSITION = 35;
     protected static final int DEFAULT_RIGHT_POSITION = 15;
 
-    protected final AxisModel<LinearScale> xModel = AxisModel.createLinear();
+    protected final AxisModel<LinearScale> xModel;
 
-    protected final AxisModel<LinearScale> yModel = AxisModel.createLinear();
+    protected final AxisModel<LinearScale> yModel;
 
     private ChartAxis<? extends Scale<?>> xAxis;
 
@@ -82,7 +85,7 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
     // ==== children =========
     protected GContainer g;
 
-    private ClipPath clipPath;
+    private ClipPath dataRegionClipPath;
 
     /**
      * Configure the chart.
@@ -143,18 +146,21 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
         public String x();
     }
 
-    public BaseChart() {
-        this((Resources) GWT.create(Resources.class));
+    public BaseChart(final BaseChartModel<T, LinearScale> model) {
+        this(model, (Resources) GWT.create(Resources.class));
     }
 
-    public BaseChart(final Resources resources) {
+    public BaseChart(final BaseChartModel<T, LinearScale> model, final Resources resources) {
         super(resources);
+
+        xModel = model.xModel();
+        yModel = model.yModel();
 
         // getElement().setAttribute("viewBox", "0 0 500 400");
         styles = resources.chartStyles();
         styles.ensureInjected();
 
-        clipPath = new ClipPath("clip" + Random.nextInt(100000));
+        dataRegionClipPath = new ClipPath("clip" + Random.nextInt(100000));
 
         createChildren();
     }
@@ -224,8 +230,8 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
     }
 
     private void redrawClippath() {
-        SelectionDataJoiner.update(g.select(), Arrays.asList(clipPath),
-                new DefaultSelectionUpdater<ClipPath>("#" + clipPath.getId()) {
+        SelectionDataJoiner.update(g.select(), Arrays.asList(dataRegionClipPath),
+                new DefaultSelectionUpdater<ClipPath>("#" + dataRegionClipPath.getId()) {
                     @Override
                     public String getElementName() {
                         return "clipPath";
@@ -234,7 +240,7 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
                     @Override
                     public void afterEnter(final Selection selection) {
                         super.afterEnter(selection);
-                        selection.attr("id", clipPath.getId())
+                        selection.attr("id", dataRegionClipPath.getId())
                                 .append("rect");
                     }
 
@@ -320,7 +326,7 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
 
     @Override
     public ClipPath getSerieClipPath() {
-        return clipPath;
+        return dataRegionClipPath;
     }
 
     /**

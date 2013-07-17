@@ -26,55 +26,24 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.github.gwtd3.ui.chart;
+package com.github.gwtd3.ui.chart.renderer;
 
-import com.github.gwtd3.api.core.Selection;
-import com.github.gwtd3.api.core.Value;
-import com.github.gwtd3.api.functions.DatumFunction;
-import com.google.gwt.dom.client.Element;
+import com.github.gwtd3.ui.model.Serie;
 
 /**
- * Represent a clip path in a SVG document.
+ * Renderer allow a {@link Serie} to be drawn in a document.
  * <p>
  * 
+ * @author <a href="mailto:schiochetanthoni@gmail.com">Anthony Schiochet</a>
  * 
- * @author SCHIOCA
- * 
+ * @param <T>
  */
-public class ClipPath {
-
-    private final String id;
-
-    public ClipPath(final String id) {
-        super();
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
+public interface Renderer<T> {
 
     /**
-     * Apply the clip path on the given node.
-     * 
-     * @param e
+     * The renderer used in the frame of
+     * @param serie
      */
-    public void apply(final Element e) {
-        e.setAttribute("clip-path", "url(#" + getId() + ")");
-    }
-
-    /**
-     * Apply the clip path on the elements of the selection.
-     * 
-     * @param e
-     */
-    public void apply(final Selection s) {
-        s.attr("clip-path", new DatumFunction<String>() {
-            @Override
-            public String apply(final Element context, final Value d, final int index) {
-                return "url(#" + getId() + ")";
-            }
-        });
-    }
+    void render(Serie<T> serie);
 
 }

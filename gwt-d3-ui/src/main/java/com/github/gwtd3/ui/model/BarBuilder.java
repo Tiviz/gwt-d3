@@ -26,55 +26,28 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.github.gwtd3.ui.chart;
-
-import com.github.gwtd3.api.core.Selection;
-import com.github.gwtd3.api.core.Value;
-import com.github.gwtd3.api.functions.DatumFunction;
-import com.google.gwt.dom.client.Element;
+package com.github.gwtd3.ui.model;
 
 /**
- * Represent a clip path in a SVG document.
+ * Convert domain objects into bars, like in a bar chart.
+ * <p>
+ * A bar has a width and a height, one of which should encode the visualized domain dimension (for instance, for
+ * vertical bars, the height should encode the visualized domain dimension, and the width should be constant).
+ * <p>
+ * The bar will be located on its axis using the value returned by location.
  * <p>
  * 
+ * @author <a href="mailto:schiochetanthoni@gmail.com">Anthony Schiochet</a>
  * 
- * @author SCHIOCA
- * 
+ * @param <T> type of the domain object
+ * @param <L> type of the object used to locate the bar
  */
-public class ClipPath {
+public interface BarBuilder<T, L> {
+    double width(T value);
 
-    private final String id;
+    double height(T value);
 
-    public ClipPath(final String id) {
-        super();
-        this.id = id;
-    }
+    L location(T value);
 
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Apply the clip path on the given node.
-     * 
-     * @param e
-     */
-    public void apply(final Element e) {
-        e.setAttribute("clip-path", "url(#" + getId() + ")");
-    }
-
-    /**
-     * Apply the clip path on the elements of the selection.
-     * 
-     * @param e
-     */
-    public void apply(final Selection s) {
-        s.attr("clip-path", new DatumFunction<String>() {
-            @Override
-            public String apply(final Element context, final Value d, final int index) {
-                return "url(#" + getId() + ")";
-            }
-        });
-    }
-
+    String styleNames(T value);
 }

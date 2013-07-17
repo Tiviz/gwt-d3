@@ -70,8 +70,9 @@ public class SVGDocumentContainer extends SVGContainer implements ISVGDocument {
         this.styles = this.resources.svgStyles();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Returns the {@link Selection} containing the root element,
+     * that is, the <code>svg</code> element.
      * 
      * @see com.github.gwtd3.ui.HasD3Selection#select()
      */

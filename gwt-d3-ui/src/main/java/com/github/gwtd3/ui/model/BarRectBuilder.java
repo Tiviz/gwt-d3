@@ -26,55 +26,46 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.github.gwtd3.ui.chart;
+package com.github.gwtd3.ui.model;
 
-import com.github.gwtd3.api.core.Selection;
-import com.github.gwtd3.api.core.Value;
-import com.github.gwtd3.api.functions.DatumFunction;
-import com.google.gwt.dom.client.Element;
+public class BarRectBuilder<T, L> implements RectBuilder<T> {
 
-/**
- * Represent a clip path in a SVG document.
- * <p>
- * 
- * 
- * @author SCHIOCA
- * 
- */
-public class ClipPath {
+    private final AxisModel<?> xModel;
+    private final AxisModel<?> yModel;
+    private final BarBuilder<T, Double> domainBuilder;
 
-    private final String id;
-
-    public ClipPath(final String id) {
+    public BarRectBuilder(final AxisModel<?> xModel, final AxisModel<?> yModel, final BarBuilder<T, Double> domainBuilder) {
         super();
-        this.id = id;
+        this.xModel = xModel;
+        this.yModel = yModel;
+        this.domainBuilder = domainBuilder;
     }
 
-    public String getId() {
-        return id;
+    @Override
+    public double x(final T value) {
+        return xModel.toPixel(domainBuilder.location(value) - (domainBuilder.width(value) / 2));
     }
 
-    /**
-     * Apply the clip path on the given node.
-     * 
-     * @param e
-     */
-    public void apply(final Element e) {
-        e.setAttribute("clip-path", "url(#" + getId() + ")");
+    @Override
+    public double y(final T value) {
+        return yModel.toPixel(domainBuilder.height(value));
+        // return yModel.toPixelSize(yModel.visibleDomainLength()) - height(value);
     }
 
-    /**
-     * Apply the clip path on the elements of the selection.
-     * 
-     * @param e
-     */
-    public void apply(final Selection s) {
-        s.attr("clip-path", new DatumFunction<String>() {
-            @Override
-            public String apply(final Element context, final Value d, final int index) {
-                return "url(#" + getId() + ")";
-            }
-        });
+    @Override
+    public double width(final T value) {
+        return xModel.toPixelSize(domainBuilder.width(value));
     }
 
+    @Override
+    public double height(final T value) {
+        double height = domainBuilder.height(value);
+        System.out.println(height);
+        return yModel.toPixelSize(height);
+    }
+
+    @Override
+    public String styleNames(final T value) {
+        return domainBuilder.styleNames(value);
+    }
 }
