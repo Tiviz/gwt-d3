@@ -42,7 +42,7 @@ import com.google.common.collect.Range;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.Random;
 
-public class LineRenderer<T> implements Renderer<T> {
+public class LineRenderer<T> implements Renderer {
 
     private final Element container;
     private final LineGenerator<T> generator;
@@ -52,10 +52,13 @@ public class LineRenderer<T> implements Renderer<T> {
     private String additionalClassNames = "";
     private ClipPath clipPath;
 
-    public LineRenderer(final PointBuilder<T> domainBuilder,
+    private final Serie<T> serie;
+
+    public LineRenderer(final Serie<T> serie, final PointBuilder<T> domainBuilder,
             final AxisModel<?> xModel, final AxisModel<?> yModel,
             final ClipPath clipPath, final Element container) {
         super();
+        this.serie = serie;
         this.xModel = xModel;
         this.yModel = yModel;
         this.clipPath = clipPath;
@@ -69,30 +72,30 @@ public class LineRenderer<T> implements Renderer<T> {
     }
 
     @Override
-    public void render(final Serie<T> serie) {
+    public void render() {
         // create or get a path element
-        Element path = getOrCreatePathElement(serie);
+        Element path = getOrCreatePathElement();
         configurePathElement(path);
         path.setAttribute("d", generator.generate(serie.getValues()));
 
     }
 
-    private Element getOrCreatePathElement(final Serie<T> serie) {
-        Element e = findPath(serie);
+    private Element getOrCreatePathElement() {
+        Element e = findPath();
         if (e == null) {
-            e = createPath(serie);
+            e = createPath();
         }
         return e;
     }
 
-    private Element createPath(final Serie<T> serie) {
+    private Element createPath() {
         Element pathElement = DOM.createSVGElement("path");
         pathElement.setAttribute("name", "serie_" + serie.id());
         container.appendChild(pathElement);
         return pathElement;
     }
 
-    private Element findPath(final Serie<T> serie) {
+    private Element findPath() {
         return D3.select(container).select("[name=\"serie_" + serie.id() + "\"]").node();
     }
 

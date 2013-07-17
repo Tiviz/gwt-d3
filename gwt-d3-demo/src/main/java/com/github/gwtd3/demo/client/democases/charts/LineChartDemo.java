@@ -72,7 +72,7 @@ public class LineChartDemo extends Composite implements DemoCase {
     interface LineChartDemoUiBinder extends UiBinder<Widget, LineChartDemo> {}
 
     @UiField(provided = true)
-    LineChart<Data> lineChart;
+    LineChart lineChart;
 
     @UiField
     Slider xrange;
@@ -111,9 +111,9 @@ public class LineChartDemo extends Composite implements DemoCase {
 
     private void createChart() {
 
-        LineChartModel<Data, LinearScale> model =
-                new LineChartModel<Data, LinearScale>(AxisModel.createLinear(), AxisModel.createLinear());
-        this.lineChart = new LineChart<Data>(model);
+        LineChartModel<LinearScale> model =
+                new LineChartModel<LinearScale>(AxisModel.createLinear(), AxisModel.createLinear());
+        this.lineChart = new LineChart(model);
         // configure
         lineChart.xAxis().formatter(new DatumFunction<String>() {
             @Override
@@ -214,18 +214,19 @@ public class LineChartDemo extends Composite implements DemoCase {
         range = range / 8;
         // lineChart.model().serie("tf1").values(result.asList())
         // .putNamedRange("diff1", Range.closed(lower + range, upper - range));
-        lineChart.registerLineSerieRenderer(lineChart.model().serie("tf1").values(result.asList()), new DataPoint());
+        lineChart.renderLines(lineChart.model().serie("wholeData", Data.class).values(result.asList()),
+                new DataPoint());
 
         lineChart
-                .registerLineSerieRenderer(lineChart.model().serie("partialTf1").values(result.asList()),
+                .renderLines(lineChart.model().serie("partialData", Data.class).values(result.asList()),
                         new DataPoint())
                 .include(Range.closed(lower + range, upper - range))
                 .addStyleNames(styles.partial());
         // .putNamedRange("diff1", Range.closed(lower + range, upper - range))
         // bar chart
         // .putNamedRange("diff1", Range.closed(lower + range, upper - range));
-        lineChart.registerBarSerieRenderer(
-                lineChart.model().serie("rect")
+        lineChart.renderBars(
+                lineChart.model().serie("rect", Data.class)
                         // only every N values pass
                         .values(new ArrayList<Data>(Collections2.filter(result.asList(), new Predicate<Data>() {
                             private int index = 0;

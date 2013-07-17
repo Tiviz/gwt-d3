@@ -53,10 +53,8 @@ import com.google.gwt.user.client.Random;
  * <p>
  * 
  * @author SCHIOCA
- * 
- * @param <T>
  */
-public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
+public class BaseChart extends SVGDocumentContainer implements ChartContext {
 
     protected static final int DEFAULT_TOP_POSITION = 20;
     protected static final int DEFAULT_BOTTOM_POSITION = 30;
@@ -67,11 +65,14 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
 
     protected final AxisModel<LinearScale> yModel;
 
+    // ==== children =========
+    protected GContainer g;
+
     private ChartAxis<? extends Scale<?>> xAxis;
 
     private ChartAxis<? extends Scale<?>> yAxis;
 
-    private Styles styles;
+    private final Styles styles;
 
     /**
      * Support for x or y sliding
@@ -82,75 +83,72 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
      */
     private final Options options = new Options(this);
 
-    // ==== children =========
-    protected GContainer g;
-
-    private ClipPath dataRegionClipPath;
+    private final ClipPath dataRegionClipPath;
 
     /**
-     * Configure the chart.
+     * Configuration options the chart.
      * 
      * @author SCHIOCA
      * 
      */
     public class Options {
-        private final BaseChart<T> chart;
+        private final BaseChart chart;
 
-        public Options(final BaseChart<T> chart) {
+        public Options(final BaseChart chart) {
             super();
             this.chart = chart;
         }
 
         public Options enableXNavigation(final boolean enable) {
             if (enable) {
-                dragSupport.enable();
+                chart.dragSupport.enable();
             }
             else {
-                dragSupport.disable();
+                chart.dragSupport.disable();
             }
             return this;
         }
 
     }
 
-    public static interface Resources extends SVGResources {
+    public interface Resources extends SVGResources {
         @Source("BaseChart.css")
         BaseChart.Styles chartStyles();
     }
 
-    public static interface Styles extends SVGStyles {
+    public interface Styles extends SVGStyles {
         /**
          * @return the classname applied to any axis
          */
-        public String axis();
+        String axis();
 
         /**
          * class applied to all labels
          * 
          * @return
          */
-        public String label();
+        String label();
 
         /**
          * class applied to all element on the y axis
          * 
          * @return
          */
-        public String y();
+        String y();
 
         /**
          * class applied to all element on the x axis
          * 
          * @return
          */
-        public String x();
+        String x();
     }
 
-    public BaseChart(final BaseChartModel<T, LinearScale> model) {
+    public BaseChart(final BaseChartModel<LinearScale> model) {
         this(model, (Resources) GWT.create(Resources.class));
     }
 
-    public BaseChart(final BaseChartModel<T, LinearScale> model, final Resources resources) {
+    public BaseChart(final BaseChartModel<LinearScale> model, final Resources resources) {
         super(resources);
 
         xModel = model.xModel();
@@ -268,27 +266,11 @@ public class BaseChart<T> extends SVGDocumentContainer implements ChartContext {
     }
 
     private void redrawAxis() {
-        // System.out.println("blah:" + getSVGElement().getViewport());
-        // System.out.println("viewBox:" +
-        // getSVGElement().getViewBox().getBaseVal().getWidth());
-        // System.out.println("viewBox:" +
-        // getSVGElement().getViewBox().getBaseVal().getWidth());
-        // System.out.println("blah:" + getSVGElement().getViewportElement());
-        // System.out.println("DIMS:" + chartWidth() + " " + chartHeight());
-        // resizing
-        // TODO: let the user customzie the X axis position
+        // TODO let the user customize the X axis position
         xAxis.transform().removeAll().translate(0, chartHeight());
         xAxis.setLength(chartWidth());
         yAxis.setLength(chartHeight());
 
-        // domain changes
-
-        // values changes
-        // Object object = JsoInspector.convertToInspectableObject(getSVGElement().getChild(0));
-        // System.out.println(object);
-        // System.out.println(object);
-        // System.out.println("blah:" + getSVGElement().getViewport());
-        // System.out.println("blah:" + getSVGElement().getViewportElement());
     }
 
     // ============= getters =============

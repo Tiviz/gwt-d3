@@ -46,7 +46,7 @@ import com.google.gwt.event.shared.HasHandlers;
  * 
  * @param <T>
  */
-public class BaseChartModel<T, S extends Scale<S>> implements HasHandlers {
+public class BaseChartModel<S extends Scale<S>> implements HasHandlers {
 
     private final AxisModel<S> xModel;
     private final AxisModel<S> yModel;

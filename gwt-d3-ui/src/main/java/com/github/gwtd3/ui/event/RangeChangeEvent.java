@@ -36,7 +36,7 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class RangeChangeEvent extends GwtEvent<RangeChangeEvent.RangeChangeHandler> {
 
-    public static Type<RangeChangeHandler> TYPE = new Type<RangeChangeHandler>();
+    public static final Type<RangeChangeHandler> TYPE = new Type<RangeChangeHandler>();
     private final Range<?> newRange;
     private final Range<?> oldRange;
 

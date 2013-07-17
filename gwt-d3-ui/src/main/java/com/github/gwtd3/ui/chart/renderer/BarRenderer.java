@@ -41,7 +41,7 @@ import com.github.gwtd3.ui.model.RectBuilder;
 import com.github.gwtd3.ui.model.Serie;
 import com.google.gwt.dom.client.Element;
 
-public class BarRenderer<T, L> implements Renderer<T> {
+public class BarRenderer<T, L> implements Renderer {
 
     private final Element container;
 
@@ -51,17 +51,20 @@ public class BarRenderer<T, L> implements Renderer<T> {
 
     private String additionalStyleNames = "";
 
-    public BarRenderer(final BarBuilder<T, Double> domainBuilder,
+    private final Serie<T> serie;
+
+    public BarRenderer(final Serie<T> serie, final BarBuilder<T, Double> domainBuilder,
             final AxisModel<?> xModel, final AxisModel<?> yModel,
             final ClipPath clipPath, final Element container) {
         super();
+        this.serie = serie;
         this.rectBuilder = new BarRectBuilder<T, Double>(xModel, yModel, domainBuilder);
         this.clipPath = clipPath;
         this.container = container;
     }
 
     @Override
-    public void render(final Serie<T> serie) {
+    public void render() {
         // create or get a path element
         Selection rectangles = selectOrCreateRectangleSelection(serie);
         updateRectangle(rectangles);

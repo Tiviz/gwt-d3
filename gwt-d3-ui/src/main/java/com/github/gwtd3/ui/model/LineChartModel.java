@@ -45,18 +45,18 @@ import com.github.gwtd3.ui.event.SerieRemovedEvent.SerieRemovedHandler;
 import com.github.gwtd3.ui.event.SerieRemovedEvent.SerieRemovedHasHandlers;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
-public class LineChartModel<T, S extends Scale<S>> extends BaseChartModel<T, S> implements SerieAddedHasHandlers<T>,
-        SerieRemovedHasHandlers<T> {
+public class LineChartModel<S extends Scale<S>> extends BaseChartModel<S> implements SerieAddedHasHandlers,
+        SerieRemovedHasHandlers {
 
-    private final Map<String, Serie<T>> series = new HashMap<String, Serie<T>>();
+    private final Map<String, Serie<?>> series = new HashMap<String, Serie<?>>();
 
     public LineChartModel(final AxisModel<S> xModel, final AxisModel<S> yModel) {
         super(xModel, yModel);
     }
 
-    public static <X, Y extends Scale<Y>> LineChartModel<X, Y> create(final AxisModel<Y> xModel,
+    public static <Y extends Scale<Y>> LineChartModel<Y> create(final AxisModel<Y> xModel,
             final AxisModel<Y> yModel) {
-        return new LineChartModel<X, Y>(xModel, yModel);
+        return new LineChartModel<Y>(xModel, yModel);
     }
 
     // =========== series methods ================
@@ -70,36 +70,46 @@ public class LineChartModel<T, S extends Scale<S>> extends BaseChartModel<T, S> 
      * 
      * @return the list of series.
      */
-    public List<Serie<T>> series() {
-        return Collections.unmodifiableList(new ArrayList<Serie<T>>(series.values()));
+    public List<Serie<?>> series() {
+        return Collections.unmodifiableList(new ArrayList<Serie<?>>(series.values()));
     }
 
-    public Array<Serie<T>> seriesAsArray() {
+    public Array<Serie<?>> seriesAsArray() {
         return JsArrays.asJsArray(series());
     }
 
     /**
-     * Returns the serie identified by the given id. If such a serie does not
-     * exist, it is created.
+     * Returns the series identified by the given id.
      * <p>
-     * 
-     * @param serie
+     * If such a series does not exist, it is created.
+     * <p>
+     * @param series
      * @return
      */
-    public Serie<T> serie(final String id) {
-        Serie<T> serie = this.series.get(id);
+    @SuppressWarnings("unchecked")
+    public <T> Serie<T> series(final String id) {
+        Serie<T> serie = (Serie<T>) this.series.get(id);
         if (serie == null) {
             serie = new Serie<T>(id);
             this.series.put(id, serie);
-            fireEvent(new SerieAddedEvent<T>(serie));
+            fireEvent(new SerieAddedEvent(serie));
         }
         return serie;
     }
 
-    public BaseChartModel<T, S> removeSerie(final String id) {
-        Serie<T> serie = this.series.remove(id);
+    /**
+     * @param id
+     * @param clazz
+     * @return
+     */
+    public <T> Serie<T> serie(final String id, final Class<T> clazz) {
+        return series(id);
+    }
+
+    public BaseChartModel<S> removeSerie(final String id) {
+        Serie<?> serie = this.series.remove(id);
         if (serie != null) {
-            fireEvent(new SerieRemovedEvent<T>(serie));
+            fireEvent(new SerieRemovedEvent(serie));
         }
         return this;
     }
@@ -107,12 +117,12 @@ public class LineChartModel<T, S extends Scale<S>> extends BaseChartModel<T, S> 
     // =========== events methods ================
 
     @Override
-    public HandlerRegistration addSerieAddedHandler(final SerieAddedHandler<T> handler) {
+    public HandlerRegistration addSerieAddedHandler(final SerieAddedHandler handler) {
         return eventManager.addHandler(SerieAddedEvent.TYPE, handler);
     }
 
     @Override
-    public HandlerRegistration addSerieRemovedHandler(final SerieRemovedHandler<T> handler) {
+    public HandlerRegistration addSerieRemovedHandler(final SerieRemovedHandler handler) {
         return eventManager.addHandler(SerieRemovedEvent.TYPE, handler);
     }
 

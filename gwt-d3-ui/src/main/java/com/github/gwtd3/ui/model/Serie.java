@@ -51,9 +51,9 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * 
  * @author <a href="mailto:schiochetanthoni@gmail.com">Anthony Schiochet</a>
  * 
- * @param <T>
+ * @param <T> type of values
  */
-public class Serie<T> implements SerieChangeHasHandlers<T>, ValueProvider<T> {
+public class Serie<T> implements SerieChangeHasHandlers, ValueProvider<T> {
 
     private final HandlerManager eventManager = new HandlerManager(this);
 
@@ -96,7 +96,7 @@ public class Serie<T> implements SerieChangeHasHandlers<T>, ValueProvider<T> {
 
     public Serie<T> values(final List<T> t) {
         this.values = t;
-        fireEvent(new SerieChangeEvent<T>(this));
+        fireEvent(new SerieChangeEvent(this));
         return this;
     }
 
@@ -255,7 +255,7 @@ public class Serie<T> implements SerieChangeHasHandlers<T>, ValueProvider<T> {
     }
 
     @Override
-    public HandlerRegistration addSerieChangeHandler(final SerieChangeHandler<T> handler) {
+    public HandlerRegistration addSerieChangeHandler(final SerieChangeHandler handler) {
         return eventManager.addHandler(SerieChangeEvent.TYPE, handler);
     }
 
@@ -265,7 +265,7 @@ public class Serie<T> implements SerieChangeHasHandlers<T>, ValueProvider<T> {
      */
     public Serie<T> setClassNames(final String classNames) {
         this.classNames = classNames;
-        fireEvent(new SerieChangeEvent<T>(this));
+        fireEvent(new SerieChangeEvent(this));
         return this;
     }
 

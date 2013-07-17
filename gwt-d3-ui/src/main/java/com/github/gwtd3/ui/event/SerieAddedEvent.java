@@ -35,46 +35,44 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
-public class SerieAddedEvent<T> extends GwtEvent<SerieAddedHandler<T>> {
+public class SerieAddedEvent extends GwtEvent<SerieAddedHandler> {
 
-    public static Type<SerieAddedHandler<?>> TYPE = new Type<SerieAddedHandler<?>>();
-    private final Serie<T> serie;
+    public static final Type<SerieAddedHandler> TYPE = new Type<SerieAddedHandler>();
+    private final Serie<?> serie;
 
-    public interface SerieAddedHandler<T> extends EventHandler {
-        void onSerieAdded(SerieAddedEvent<T> event);
+    public interface SerieAddedHandler extends EventHandler {
+        void onSerieAdded(SerieAddedEvent event);
     }
 
-    public interface SerieAddedHasHandlers<T> extends HasHandlers {
-        HandlerRegistration addSerieAddedHandler(SerieAddedHandler<T> handler);
+    public interface SerieAddedHasHandlers extends HasHandlers {
+        HandlerRegistration addSerieAddedHandler(SerieAddedHandler handler);
     }
 
-    public SerieAddedEvent(final Serie<T> serie) {
+    public SerieAddedEvent(final Serie<?> serie) {
         super();
         this.serie = serie;
     }
 
-    public Serie<T> getSerie() {
-        return serie;
+    @SuppressWarnings("unchecked")
+    public <T> Serie<T> getSerie() {
+        return (Serie<T>) serie;
     }
 
     @Override
-    protected void dispatch(final SerieAddedHandler<T> handler) {
+    protected void dispatch(final SerieAddedHandler handler) {
         handler.onSerieAdded(this);
     }
 
-    // The instance knows its BeforeSelectionHandler is of type I, but the TYPE
-    // field itself does not, so we have to do an unsafe cast here.
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public final Type<SerieAddedHandler<T>> getAssociatedType() {
-        return (Type) TYPE;
-    }
-
-    public static Type<SerieAddedHandler<?>> getType() {
+    public final Type<SerieAddedHandler> getAssociatedType() {
         return TYPE;
     }
 
-    public static <T> void fire(final HasHandlers source, final Serie<T> serie) {
-        source.fireEvent(new SerieAddedEvent<T>(serie));
+    public static Type<SerieAddedHandler> getType() {
+        return TYPE;
+    }
+
+    public static void fire(final HasHandlers source, final Serie<?> serie) {
+        source.fireEvent(new SerieAddedEvent(serie));
     }
 }

@@ -35,46 +35,45 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
-public class SerieRemovedEvent<T> extends GwtEvent<SerieRemovedHandler<T>> {
+public class SerieRemovedEvent extends GwtEvent<SerieRemovedHandler> {
 
-    public static Type<SerieRemovedHandler<?>> TYPE = new Type<SerieRemovedHandler<?>>();
-    private final Serie<T> serie;
+    public static final Type<SerieRemovedHandler> TYPE = new Type<SerieRemovedHandler>();
 
-    public interface SerieRemovedHandler<T> extends EventHandler {
-        void onSerieRemoved(SerieRemovedEvent<T> event);
+    private final Serie<?> serie;
+
+    public interface SerieRemovedHandler extends EventHandler {
+        void onSerieRemoved(SerieRemovedEvent event);
     }
 
-    public interface SerieRemovedHasHandlers<T> extends HasHandlers {
-        HandlerRegistration addSerieRemovedHandler(SerieRemovedHandler<T> handler);
+    public interface SerieRemovedHasHandlers extends HasHandlers {
+        HandlerRegistration addSerieRemovedHandler(SerieRemovedHandler handler);
     }
 
-    public SerieRemovedEvent(final Serie<T> serie) {
+    public SerieRemovedEvent(final Serie<?> serie) {
         super();
         this.serie = serie;
     }
 
-    public Serie<T> getSerie() {
-        return serie;
+    @SuppressWarnings("unchecked")
+    public <T> Serie<T> getSerie() {
+        return (Serie<T>) serie;
     }
 
     @Override
-    protected void dispatch(final SerieRemovedHandler<T> handler) {
+    protected void dispatch(final SerieRemovedHandler handler) {
         handler.onSerieRemoved(this);
     }
 
-    // The instance knows its BeforeSelectionHandler is of type I, but the TYPE
-    // field itself does not, so we have to do an unsafe cast here.
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public final Type<SerieRemovedHandler<T>> getAssociatedType() {
-        return (Type) TYPE;
+    public final Type<SerieRemovedHandler> getAssociatedType() {
+        return TYPE;
     }
 
-    public static Type<SerieRemovedHandler<?>> getType() {
+    public static Type<SerieRemovedHandler> getType() {
         return TYPE;
     }
 
     public static <T> void fire(final HasHandlers source, final Serie<T> serie) {
-        source.fireEvent(new SerieRemovedEvent<T>(serie));
+        source.fireEvent(new SerieRemovedEvent(serie));
     }
 }

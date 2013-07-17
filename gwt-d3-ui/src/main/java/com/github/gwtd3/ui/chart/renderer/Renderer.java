@@ -36,14 +36,13 @@ import com.github.gwtd3.ui.model.Serie;
  * 
  * @author <a href="mailto:schiochetanthoni@gmail.com">Anthony Schiochet</a>
  * 
- * @param <T>
  */
-public interface Renderer<T> {
+public interface Renderer {
 
     /**
      * The renderer used in the frame of
      * @param serie
      */
-    void render(Serie<T> serie);
+    void render();
 
 }

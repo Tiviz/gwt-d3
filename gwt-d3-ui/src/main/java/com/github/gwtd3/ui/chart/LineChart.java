@@ -74,21 +74,34 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
  * 
  * @author <a href="mailto:schiochetanthoni@gmail.com">Anthony Schiochet</a>
  * 
- * @param <T>
+ * @param
  */
-public class LineChart<T> extends BaseChart<T> implements SerieAddedHandler<T>, SerieRemovedHandler<T>,
-        SerieChangeHandler<T> {
+public class LineChart extends BaseChart implements SerieAddedHandler, SerieRemovedHandler,
+        SerieChangeHandler {
 
-    private final Map<Serie<T>, Renderer<T>> renderers = new HashMap<Serie<T>, Renderer<T>>();
     /**
      * The model defining this chart
      */
-    private LineChartModel<T, LinearScale> model;
+    private final LineChartModel<LinearScale> model;
 
-    private LineChart.Styles styles;
+    private final LineChart.Styles styles;
 
-    private final Map<Serie<T>, HandlerRegistration> serieChangeRegistrations =
-            new HashMap<Serie<T>, HandlerRegistration>();
+    private final Map<Serie<?>, HandlerRegistration> serieChangeRegistrations =
+            new HashMap<Serie<?>, HandlerRegistration>();
+
+    private final SerieRendererMap serieRendererMap = new SerieRendererMap();
+
+    private class SerieRendererMap {
+        private final Map<Serie<?>, Renderer> renderers = new HashMap<Serie<?>, Renderer>();
+
+        public <T> Renderer get(final Serie<T> serie) {
+            return renderers.get(serie);
+        }
+
+        public <T> Renderer put(final Serie<T> serie, final Renderer renderer) {
+            return renderers.put(serie, renderer);
+        }
+    }
 
     // ========== Resources and Styles classes =====================
 
@@ -118,18 +131,18 @@ public class LineChart<T> extends BaseChart<T> implements SerieAddedHandler<T>, 
         String serie();
     }
 
-    public LineChart(final LineChartModel<T, LinearScale> model) {
+    public LineChart(final LineChartModel<LinearScale> model) {
         this(model, createDefaultResources());
     }
 
-    public LineChart(final LineChartModel<T, LinearScale> model, final Resources resources) {
+    public LineChart(final LineChartModel<LinearScale> model, final Resources resources) {
         super(model, resources);
         // getElement().setAttribute("viewBox", "0 0 500 400");
         styles = resources.chartStyles();
         styles.ensureInjected();
 
         this.model = model;
-        // new LineChartModel<T, LinearScale>(xModel, yModel, domainBuilder);
+        // new LineChartModel<LinearScale>(xModel, yModel, domainBuilder);
     }
 
     // ============== initialization ========================
@@ -152,85 +165,19 @@ public class LineChart<T> extends BaseChart<T> implements SerieAddedHandler<T>, 
     protected void redrawSeries() {
         super.redrawSeries();
 
-        List<Serie<T>> series = model().series();
-        for (Serie<T> serie : series) {
+        List<Serie<?>> series = model().series();
+        for (Serie<?> serie : series) {
             redrawSerie(serie);
         }
-
-        // 2. NamedRanges
-        // update the selection with a path for each NamedRange in a serie
-        // FIXME: remove that
-        // DefaultSelectionUpdater<NamedRange<T>> namedRangeDrawer =
-        // new DefaultSelectionUpdater<NamedRange<T>>("." + styles.namedRange()) {
-        // // create a path
-        // @Override
-        // public String getElementName() {
-        // return "path";
-        // }
-        //
-        // @Override
-        // public String getKey(final NamedRange<T> datum, final int index) {
-        // return datum.serie().id() + "." + datum.id();
-        // }
-        //
-        // // add the .namedRange class to the newly created
-        // @Override
-        // public void afterEnter(final Selection selection) {
-        // super.afterEnter(selection);
-        // selection.classed(styles.line(), true);
-        // selection.classed(styles.namedRange(), true);
-        // getSerieClipPath().apply(selection);
-        // }
-        //
-        // // update the d attribute
-        // @Override
-        // public void onJoinEnd(final Selection selection) {
-        // super.onJoinEnd(selection);
-        // // setting the attribute d of the path
-        // selection.attr("d", new DatumFunction<String>() {
-        // @Override
-        // public String apply(final Element context, final Value d, final int index) {
-        // NamedRange<T> namedRange = d.<NamedRange<T>> as();
-        // // filter the points with the range
-        // LineGenerator<T> lineGenerator =
-        // new LineGenerator<T>(pointBuilder, new DomainFilter<T>() {
-        // @Override
-        // public boolean accept(final T value) {
-        // // return range.contains(this.serie.domainBuilder.x(value));
-        // return true;
-        // }
-        // });
-        // return lineGenerator.generate(namedRange.getValues());
-        // }
-        // });
-        // }
-        //
-        // };
-        // // // create, update (and remove), a path element for each serie
-        // // SelectionDataJoiner.update(
-        // // g.select(), // inside the root G
-        // // model.series(),// the data is the series
-        // // serieDrawer
-        // // );
-        //
-        // // create, update (and remove), a path element for each named range of each serie
-        // series = model.series();
-        // for (Serie<T> serie : series) {
-        // List<NamedRange<T>> ranges = serie.getOverlappingRanges(xModel.visibleDomain());
-        // // draw with the appropriate renderer
-        // GWT.log("named ranges count:" + ranges.size());
-        // SelectionDataJoiner.update(g.select(), ranges, namedRangeDrawer);
-        // }
-
     }
 
-    private void redrawSerie(final Serie<T> serie) {
-        Renderer<T> renderer = getRenderer(serie);
+    private <T> void redrawSerie(final Serie<?> serie) {
+        Renderer renderer = getRenderer(serie);
         if (renderer == null) {
             GWT.log("no renderer defined for the serie " + serie.id());
         }
         else {
-            renderer.render(serie);
+            renderer.render();
         }
     }
 
@@ -244,13 +191,17 @@ public class LineChart<T> extends BaseChart<T> implements SerieAddedHandler<T>, 
      * @param domainBuilder the domainbuilder
      * @return renderer the renderer for further configuration
      */
-    public LineRenderer<T> registerLineSerieRenderer(final Serie<T> serie, final PointBuilder<T> domainBuilder) {
-        LineRenderer<T> renderer = new LineRenderer<T>(
-                domainBuilder, xModel, yModel,
-                getSerieClipPath(), g.getElement()).addStyleNames(styles.serie());
-        // store internally
-        renderers.put(serie, renderer);
-
+    public <T> LineRenderer<T> renderLines(final Serie<T> serie, final PointBuilder<T> domainBuilder) {
+        @SuppressWarnings("unchecked")
+        LineRenderer<T> renderer = (LineRenderer<T>) getRenderer(serie);
+        if (renderer == null) {
+            renderer = new LineRenderer<T>(
+                    serie,
+                    domainBuilder, xModel, yModel,
+                    getSerieClipPath(), g.getElement()).addStyleNames(styles.serie());
+            // store internally
+            serieRendererMap.put(serie, renderer);
+        }
         scheduleRedraw();
         return renderer;
     }
@@ -262,18 +213,24 @@ public class LineChart<T> extends BaseChart<T> implements SerieAddedHandler<T>, 
      * @param serie the serie
      * @param domainBuilder the domainbuilder
      */
-    public void registerBarSerieRenderer(final Serie<T> serie, final BarBuilder<T, Double> domainBuilder) {
-        BarRenderer<T, Double> renderer = new BarRenderer<T, Double>(
-                domainBuilder, xModel, yModel,
-                getSerieClipPath(), g.getElement()).addStyleNames(styles.serie());
-        // store internally
-        renderers.put(serie, renderer);
-
+    public <T> BarRenderer<T, Double> renderBars(final Serie<T> serie,
+            final BarBuilder<T, Double> domainBuilder) {
+        @SuppressWarnings("unchecked")
+        BarRenderer<T, Double> renderer = (BarRenderer<T, Double>) serieRendererMap.get(serie);
+        if (renderer == null) {
+            renderer = new BarRenderer<T, Double>(
+                    serie,
+                    domainBuilder, xModel, yModel,
+                    getSerieClipPath(), g.getElement()).addStyleNames(styles.serie());
+            // store internally
+            serieRendererMap.put(serie, renderer);
+        }
         scheduleRedraw();
+        return renderer;
     }
 
-    private Renderer<T> getRenderer(final Serie<T> serie) {
-        return renderers.get(serie);
+    private <T> Renderer getRenderer(final Serie<T> serie) {
+        return serieRendererMap.get(serie);
     }
 
     // ============= getters =============
@@ -287,14 +244,14 @@ public class LineChart<T> extends BaseChart<T> implements SerieAddedHandler<T>, 
      * 
      * @return the model
      */
-    public LineChartModel<T, LinearScale> model() {
+    public LineChartModel<LinearScale> model() {
         return model;
     }
 
     // =========== listens to model events ==============
 
     @Override
-    public void onSerieRemoved(final SerieRemovedEvent<T> event) {
+    public void onSerieRemoved(final SerieRemovedEvent event) {
         HandlerRegistration registration = serieChangeRegistrations.remove(event.getSerie());
         if (registration != null) {
             registration.removeHandler();
@@ -303,14 +260,14 @@ public class LineChart<T> extends BaseChart<T> implements SerieAddedHandler<T>, 
     }
 
     @Override
-    public void onSerieAdded(final SerieAddedEvent<T> event) {
+    public void onSerieAdded(final SerieAddedEvent event) {
         // attach listener on the serie
         serieChangeRegistrations.put(event.getSerie(), event.getSerie().addSerieChangeHandler(this));
         redrawSeries();
     }
 
     @Override
-    public void onSerieChange(final SerieChangeEvent<T> event) {
+    public void onSerieChange(final SerieChangeEvent event) {
         redrawSerie(event.getSerie());
     }
 
