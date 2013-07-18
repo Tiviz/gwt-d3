@@ -133,18 +133,22 @@ public class LineRenderer<T> implements Renderer {
         String id = "clip" + serie.id();
 
         // ENTER : create a clip path in the container (if needed)
-        Selection inclusionClipPath =
+        Selection containerSelection =
                 D3.select(container)
-                        .selectAll("#" + id)
-                        .data(Arrays.asList(id))
-                        .enter()
-                        .append("clipPath")
-                        .attr("id", id)
-                        .attr("clip-path", "url(#" + globalClipPath.getId() + ")")
-                        .append("rect");
+                        .selectAll("#" + id);
+
+        containerSelection
+                .data(Arrays.asList(id))
+                .enter()
+                .append("clipPath")
+                .attr("id", id)
+                .attr("clip-path", "url(#" + globalClipPath.getId() + ")")
+                .append("rect");
+
         // UPDATE the clip path
         double extent = Math.abs(includedRange.lowerEndpoint() - includedRange.upperEndpoint());
-        inclusionClipPath
+        containerSelection
+                .selectAll("rect")
                 .attr("x", xModel.toPixel(includedRange.lowerEndpoint()))
                 .attr("y", 0)
                 .attr("width", xModel.toPixelSize(extent))
