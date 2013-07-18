@@ -60,7 +60,6 @@ public class BarRectBuilder<T, L> implements RectBuilder<T> {
     @Override
     public double height(final T value) {
         double height = domainBuilder.height(value);
-        System.out.println(height);
         return yModel.toPixelSize(height);
     }
 
