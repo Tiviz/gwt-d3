@@ -26,40 +26,37 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.github.gwtd3.api.interpolators;
+package com.github.gwtd3.api.ease;
 
-import com.github.gwtd3.api.D3;
-import com.github.gwtd3.api.core.Value;
+public enum Mode {
 
-import com.google.gwt.core.client.JavaScriptObject;
+    /**
+     * The identity function
+     */
+    IN("in"),
 
-/**
- * An interpolator used when the interpolation function is provided by JSNI.
- * <p>
- * This class is used by {@link D3} to allow java code to invoke built-in
- * interpolators. You should not instanciate this object unless you know what
- * you are doing.
- * <p>
- * 
- * @author <a href="mailto:schiochetanthoni@gmail.com">Anthony Schiochet</a>
- * 
- */
-public class JavascriptFunctionInterpolator extends JavaScriptObject implements Interpolator<Value> {
+    /**
+     * reverses the easing direction [1,0]
+     */
+    OUT("out"),
 
-    protected JavascriptFunctionInterpolator() {
-        super();
+    /**
+     * copies and mirrors the easing function from [0,.5] and [.5,1].
+     */
+    IN_OUT("in-out"),
+
+    /**
+     * copies and mirrors the easing function from [1,.5] and [.5,0].
+     */
+    OUT_IN("out-in");
+
+    private String value;
+
+    private Mode(final String value) {
+        this.value = value;
     }
 
-    @Override
-    public final native Value interpolate(final double t)/*-{
-		return {
-			datum : this(t)
-		};
-    }-*/;
-
-    @Override
-    public final JavaScriptObject asJSOFunction() {
-        return this;
+    public String getValue() {
+        return value;
     }
-
 }

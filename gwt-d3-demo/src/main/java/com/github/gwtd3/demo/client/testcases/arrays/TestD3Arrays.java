@@ -51,14 +51,14 @@ public class TestD3Arrays extends AbstractTestCase {
 
     private void testMaxAndMin() {
         assertEquals(200, D3.max(JsArrays.asJsArray(52, 200, 31)).asInt());
-        assertEquals(52, D3.max(Array.create("52", "200", "31")).asInt());
+		assertEquals(52, D3.max(Array.fromObjects("52", "200", "31")).asInt());
         assertEquals(205, D3.max(JsArrays.asJsArray(52, 200, 31), Callbacks.add(5)).asInt());
-        assertEquals(205, D3.max(Array.create("52", "200", "31"), Callbacks.add(5)).asInt());
+		assertEquals(205, D3.max(Array.fromObjects("52", "200", "31"), Callbacks.add(5)).asInt());
 
         assertEquals(31, D3.min(JsArrays.asJsArray(52, 200, 31)).asInt());
-        assertEquals(200, D3.min(Array.create("52", "200", "31")).asInt());
+		assertEquals(200, D3.min(Array.fromObjects("52", "200", "31")).asInt());
         assertEquals(36, D3.min(JsArrays.asJsArray(52, 200, 31), Callbacks.add(5)).asInt());
-        assertEquals(36, D3.min(Array.create("52", "200", "31"), Callbacks.add(5)).asInt());
+		assertEquals(36, D3.min(Array.fromObjects("52", "200", "31"), Callbacks.add(5)).asInt());
 
         System.out.println(D3.max(Array.create()));
         assertTrue(D3.min(Array.create()).isUndefined());

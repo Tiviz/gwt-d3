@@ -28,6 +28,7 @@
  */
 package com.github.gwtd3.demo.client.testcases;
 
+import com.github.gwtd3.api.Coords;
 import com.github.gwtd3.api.core.Value;
 import com.github.gwtd3.demo.client.test.AbstractTestCase;
 
@@ -39,6 +40,28 @@ public class TestValue extends AbstractTestCase {
 
     @Override
     public void doTest(final ComplexPanel sandbox) {
+		// typeof
+		assertEquals("function", getFunction().typeof());
+		assertEquals("number", getInt().typeof());
+		assertEquals("object", getNewNumber().typeof());
+		assertEquals("number", getDecimal().typeof());
+		assertEquals("number", getInfinityMinus().typeof());
+		assertEquals("number", getInfinityPlus().typeof());
+		assertEquals("number", getZero().typeof());
+		assertEquals("string", getStringWithInt().typeof());// should we ?
+		assertEquals("number", getNaN().typeof());
+		assertEquals("string", getStringEmpty().typeof());
+		assertEquals("object", getNewStringObject().typeof());
+		assertEquals("string", getString().typeof());
+		assertEquals("string", getStringWithFalse().typeof());
+		assertEquals("string", getStringWithTrue().typeof());
+		assertEquals("object", getNull().typeof());
+		assertEquals("undefined", getUndefined().typeof());
+		assertEquals("boolean", getTrue().typeof());
+		assertEquals("boolean", getFalse().typeof());
+		assertEquals("object", getNewBooleanTrue().typeof());
+		assertEquals("object", getNewBooleanFalse().typeof());
+
         // is boolean
         assertTrue(getTrue().isBoolean());
         assertTrue(getFalse().isBoolean());
@@ -83,6 +106,28 @@ public class TestValue extends AbstractTestCase {
         // assertFalse(getFalse().isNumber());
         // assertTrue(getNewBooleanTrue().isNumber());
         // assertTrue(getNewBooleanFalse().isNumber());
+
+		// is String
+		assertFalse(getFunction().isString());
+		assertFalse(getInt().isString());
+		assertFalse(getNewNumber().isString());
+		assertFalse(getDecimal().isString());
+		assertFalse(getInfinityMinus().isString());
+		assertFalse(getInfinityPlus().isString());
+		assertFalse(getZero().isString());
+		assertTrue(getStringWithInt().isString());// should we ?
+		assertFalse(getNaN().isString());
+		assertTrue(getStringEmpty().isString());
+		assertTrue(getNewStringObject().isString());
+		assertTrue(getString().isString());
+		assertTrue(getStringWithFalse().isString());
+		assertTrue(getStringWithTrue().isString());
+		assertFalse(getNull().isString());
+		assertFalse(getUndefined().isString());
+		assertFalse(getTrue().isString());
+		assertFalse(getFalse().isString());
+		assertFalse(getNewBooleanTrue().isString());
+		assertFalse(getNewBooleanFalse().isString());
 
         // is function
         assertTrue(getFunction().isFunction());
@@ -345,9 +390,23 @@ public class TestValue extends AbstractTestCase {
         assertTrue(value.asString().contains("function"));
         assertTrue(Double.isNaN(value.asJsDate().getTime()));
 
+		// object wrapper
+		value = Value.create(getCoords(10, 12));
+		assertTrue(value.getProperty("x").isDefined());
+		assertEquals(10, value.getProperty("x").asInt());
+		assertEquals(12, value.getProperty("y").asInt());
+		assertTrue(value.getProperty("fake").isUndefined());
+		assertFalse(value.getProperty("x").isBoolean());
+		assertFalse(value.getProperty("x").isString());
+		assertFalse(value.getProperty("x").isFunction());
+
     }
 
-    private boolean die(int num) {
+	private static final Coords getCoords(final int x, final int y) {
+		return Coords.create(x, y);
+	}
+
+	private boolean die(final int num) {
 		Window.alert("line " + num);
 		return true;
 	}
@@ -374,6 +433,12 @@ public class TestValue extends AbstractTestCase {
 			datum : 'foobar'
 		};
     }-*/;
+
+	private final native Value getNewStringObject()/*-{
+		return {
+			datum : new String('foobar')
+		};
+	}-*/;
 
     private final native Value getStringWithTrue()/*-{
 		return {

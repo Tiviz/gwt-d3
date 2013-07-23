@@ -26,40 +26,32 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/**
+ * 
+ */
 package com.github.gwtd3.api.interpolators;
 
 import com.github.gwtd3.api.D3;
-import com.github.gwtd3.api.core.Value;
-
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * An interpolator used when the interpolation function is provided by JSNI.
+ * Use this class as a base class to create {@link InterpolatorFactory} implementations that can be passed to {@link D3#interpolators()
+ * D3.interpolators().push()}.
  * <p>
- * This class is used by {@link D3} to allow java code to invoke built-in
- * interpolators. You should not instanciate this object unless you know what
- * you are doing.
- * <p>
+ * 
  * 
  * @author <a href="mailto:schiochetanthoni@gmail.com">Anthony Schiochet</a>
  * 
  */
-public class JavascriptFunctionInterpolator extends JavaScriptObject implements Interpolator<Value> {
+public abstract class AbstractInterpolatorFactory<O> implements InterpolatorFactory<O> {
 
-    protected JavascriptFunctionInterpolator() {
-        super();
-    }
+	@Override
+	public abstract <I> Interpolator<O> create(final I a, final I b);
 
-    @Override
-    public final native Value interpolate(final double t)/*-{
-		return {
-			datum : this(t)
-		};
-    }-*/;
-
-    @Override
-    public final JavaScriptObject asJSOFunction() {
-        return this;
-    }
-
+	@Override
+	public final native JavaScriptObject asJSOFunction()/*-{
+		return function(a, b) {
+			return this.@com.github.gwtd3.api.interpolators.AbstractInterpolatorFactory::create(Ljava/lang/Object;Ljava/lang/Object;)();
+		}
+	}-*/;
 }

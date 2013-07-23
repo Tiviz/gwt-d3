@@ -30,36 +30,41 @@ package com.github.gwtd3.api.interpolators;
 
 import com.github.gwtd3.api.D3;
 import com.github.gwtd3.api.core.Value;
-
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * An interpolator used when the interpolation function is provided by JSNI.
+ * An interpolator factory returned by JSNI.
  * <p>
- * This class is used by {@link D3} to allow java code to invoke built-in
- * interpolators. You should not instanciate this object unless you know what
- * you are doing.
+ * This class is used by {@link D3} to allow java code to invoke built-in interpolator factories. You should not instanciate this object
+ * unless you know what you are doing.
  * <p>
  * 
  * @author <a href="mailto:schiochetanthoni@gmail.com">Anthony Schiochet</a>
  * 
  */
-public class JavascriptFunctionInterpolator extends JavaScriptObject implements Interpolator<Value> {
+public class JSNIInterpolatorFactory<O> extends JavaScriptObject implements InterpolatorFactory<O> {
 
-    protected JavascriptFunctionInterpolator() {
-        super();
-    }
+	protected JSNIInterpolatorFactory() {
+		super();
+	}
 
-    @Override
-    public final native Value interpolate(final double t)/*-{
-		return {
-			datum : this(t)
+	@Override
+	public final JavaScriptObject asJSOFunction() {
+		return this;
+	}
+
+	@Override
+	public final <I> Interpolator<O> create(final I a, final I b) {
+		return new JavascriptFunctionInterpolatorDecorator<O>(createInterpolator(a, b)) {
+			@Override
+			public O cast(final Value v) {
+				return v.as();
+			}
 		};
-    }-*/;
+	}
 
-    @Override
-    public final JavaScriptObject asJSOFunction() {
-        return this;
-    }
+	public final native <I> JavascriptFunctionInterpolator createInterpolator(final I a, final I b)/*-{
+		return this(a, b);
+	}-*/;
 
 }

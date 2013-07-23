@@ -26,40 +26,52 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.github.gwtd3.api.interpolators;
+package com.github.gwtd3.api.core;
 
 import com.github.gwtd3.api.D3;
-import com.github.gwtd3.api.core.Value;
-
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * An interpolator used when the interpolation function is provided by JSNI.
+ * A <a href="http://en.wikipedia.org/wiki/Metric_prefix">SI Prefix</a>, as
+ * returned by {@link D3#formatPrefix()}
  * <p>
- * This class is used by {@link D3} to allow java code to invoke built-in
- * interpolators. You should not instanciate this object unless you know what
- * you are doing.
+ * Example:
+ * 
+ * {@code
+ * var prefix = d3.formatPrefix(1.21e9);
+ * 
+ * console.log(prefix.symbol);
+ * 
+ * console.log(prefix.scale(1.21e9)); // 1.21
+ * }
  * <p>
  * 
  * @author <a href="mailto:schiochetanthoni@gmail.com">Anthony Schiochet</a>
  * 
  */
-public class JavascriptFunctionInterpolator extends JavaScriptObject implements Interpolator<Value> {
+public class Prefix extends JavaScriptObject {
 
-    protected JavascriptFunctionInterpolator() {
-        super();
-    }
+    protected Prefix() {}
 
-    @Override
-    public final native Value interpolate(final double t)/*-{
-		return {
-			datum : this(t)
-		};
+    /**
+     * Returns the prefix symbol, such as "M" for millions.
+     * <p>
+     * 
+     * @return the prefix symbol
+     */
+    public native final String symbol()/*-{
+		return this.symbol;
     }-*/;
 
-    @Override
-    public final JavaScriptObject asJSOFunction() {
-        return this;
-    }
-
+    /**
+     * Convert the number to the appropriate prefixed scale.
+     * <p>
+     * 
+     * @param input
+     *            the number to convert
+     * @return the converted number
+     */
+    public native final double scale(double input)/*-{
+		return this.scale(input)
+    }-*/;
 }

@@ -76,8 +76,7 @@ public class StupidExample2 implements DemoCase {
      */
     @Override
     public void start() {
-        Selection svg = D3.select(widget).append("svg");
-
+		Selection svg = D3.select(widget);
         svg.selectAll("circle").data(JsArrays.asJsArray(32, 57, 112, 293))
                 .enter()
                 .append("circle")

@@ -26,40 +26,27 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.github.gwtd3.api.interpolators;
-
-import com.github.gwtd3.api.D3;
-import com.github.gwtd3.api.core.Value;
+package com.github.gwtd3.api.ease;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
+
 /**
- * An interpolator used when the interpolation function is provided by JSNI.
+ * JSNI easing functions.
  * <p>
- * This class is used by {@link D3} to allow java code to invoke built-in
- * interpolators. You should not instanciate this object unless you know what
- * you are doing.
- * <p>
- * 
  * @author <a href="mailto:schiochetanthoni@gmail.com">Anthony Schiochet</a>
- * 
+ *
  */
-public class JavascriptFunctionInterpolator extends JavaScriptObject implements Interpolator<Value> {
+public class JavascriptEasingFunction extends JavaScriptObject implements EasingFunction{
 
-    protected JavascriptFunctionInterpolator() {
-        super();
-    }
+	protected JavascriptEasingFunction() {
+	}
 
-    @Override
-    public final native Value interpolate(final double t)/*-{
-		return {
-			datum : this(t)
-		};
-    }-*/;
-
-    @Override
-    public final JavaScriptObject asJSOFunction() {
-        return this;
-    }
-
+	/* (non-Javadoc)
+	 * @see com.github.gwtd3.api.ease.EasingFunction#ease(double)
+	 */
+	@Override
+	public native final double ease(double t)/*-{
+		return this(t);
+	}-*/;
 }

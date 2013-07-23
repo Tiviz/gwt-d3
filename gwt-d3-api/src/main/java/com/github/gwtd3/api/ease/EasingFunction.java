@@ -26,40 +26,31 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.github.gwtd3.api.interpolators;
+package com.github.gwtd3.api.ease;
 
-import com.github.gwtd3.api.D3;
-import com.github.gwtd3.api.core.Value;
-
-import com.google.gwt.core.client.JavaScriptObject;
+import com.github.gwtd3.api.core.Transition;
 
 /**
- * An interpolator used when the interpolation function is provided by JSNI.
+ * An easing function takes the current parameterized time value t in the domain [0,1],
+ * and maps it to another value in a similar range; it is typically used to set {@link Transition#ease()}.
  * <p>
- * This class is used by {@link D3} to allow java code to invoke built-in
- * interpolators. You should not instanciate this object unless you know what
- * you are doing.
+ * Built-in {@link EasingFunction}s may be created using {@link Easing} factory.
  * <p>
- * 
  * @author <a href="mailto:schiochetanthoni@gmail.com">Anthony Schiochet</a>
- * 
+ *
  */
-public class JavascriptFunctionInterpolator extends JavaScriptObject implements Interpolator<Value> {
-
-    protected JavascriptFunctionInterpolator() {
-        super();
-    }
-
-    @Override
-    public final native Value interpolate(final double t)/*-{
-		return {
-			datum : this(t)
-		};
-    }-*/;
-
-    @Override
-    public final JavaScriptObject asJSOFunction() {
-        return this;
-    }
-
+public interface EasingFunction {
+	/**
+	 * Given a parametric time t in the range [0,1], returns the eased time.
+	 * <p>
+	 * The returned value is typically in the range [0,1] as well, but may
+	 * extend slightly beyond this range for certain easing functions, such as
+	 * "elastic".
+	 * <p>
+	 * 
+	 * @param t
+	 *            the parametric time
+	 * @return the eased time
+	 */
+	double ease(double t);
 }

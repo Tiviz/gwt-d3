@@ -37,6 +37,7 @@ import com.github.gwtd3.demo.client.democases.FocusAndContext;
 import com.github.gwtd3.demo.client.democases.GeneralUpdatePattern1;
 import com.github.gwtd3.demo.client.democases.GeneralUpdatePattern2;
 import com.github.gwtd3.demo.client.democases.GeneralUpdatePattern3;
+import com.github.gwtd3.demo.client.democases.LorenzSystem;
 import com.github.gwtd3.demo.client.democases.StupidExample;
 import com.github.gwtd3.demo.client.democases.StupidExample2;
 import com.github.gwtd3.demo.client.democases.behaviors.DragMultiples;
@@ -103,6 +104,7 @@ public class D3Demo implements EntryPoint {
         buttonContainer.add(new DemoButton("Focus and context", FocusAndContext.factory()));
         buttonContainer.add(new DemoButton("Bar chart", BarChart.factory()));
         buttonContainer.add(new DemoButton("Chord diagram", ChordDiagram.factory()));
+		buttonContainer.add(new DemoButton("Lorenz System", LorenzSystem.factory()));
 
         buttonContainer.add(new DemoButton("Drag Multiples", DragMultiples.factory()));
 
@@ -139,9 +141,7 @@ public class D3Demo implements EntryPoint {
         /*
          * (non-Javadoc)
          * 
-         * @see
-         * com.google.gwt.event.dom.client.ClickHandler#onClick(com.google.gwt
-         * .event.dom.client.ClickEvent)
+		 * @see com.google.gwt.event.dom.client.ClickHandler#onClick(com.google.gwt .event.dom.client.ClickEvent)
          */
         @Override
         public void onClick(final ClickEvent event) {

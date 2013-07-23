@@ -32,7 +32,6 @@
 package com.github.gwtd3.demo.client.democases;
 
 import com.github.gwtd3.api.D3;
-import com.github.gwtd3.api.core.Value;
 import com.github.gwtd3.api.core.Selection;
 import com.github.gwtd3.api.core.Transition;
 import com.github.gwtd3.api.core.Value;
@@ -80,22 +79,16 @@ public class ArcTween extends FlowPanel implements DemoCase {
 
 		final double TWO_PI = 2 * Math.PI; // http://tauday.com/tau-manifesto
 
-		// the arc function defines constants for inner and outer radius, and start angle
+		// the arc function defines constants for inner and outer radius, and
+		// start angle
 		// but the end angle is deliberately kept undefined
-		arc = D3.svg().arc()
-				.innerRadius(180)
-				.outerRadius(240)
-				.startAngle(0);
+		arc = D3.svg().arc().innerRadius(180).outerRadius(240).startAngle(0);
 
 		// Create the SVG container, and apply a transform such that the origin
 		// is the center of the canvas. This way, we don't need to position
 		// arcs individually.
-		svg = D3.select(this)
-				.append("svg")
-				.attr("width", width)
-				.attr("height", height).append("g")
-				.attr("transform",
-						"translate(" + (width / 2) + "," + (height / 2) + ")");
+		svg = D3.select(this).append("svg").attr("width", width).attr("height", height).append("g")
+				.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
 
 		// construct a a stupid object containing the
 		// property "endAngle" as a constant.
@@ -108,17 +101,12 @@ public class ArcTween extends FlowPanel implements DemoCase {
 		// attributes named as the accessors.
 		svg.append("path")
 				// pass a data representing a constant endAngle arc
-				.datum(json)
-				.style("fill", "#ddd")
-				.attr("d", arc);
+				.datum(json).style("fill", "#ddd").attr("d", arc);
 
 		// set the angle to 12.7%
 		json.endAngle(.127 * TWO_PI);
 		// Add the foreground arc in orange, currently showing 12.7%.
-		final Selection foreground = svg.append("path")
-				.datum(json)
-				.style("fill", "orange")
-				.attr("d", arc);
+		final Selection foreground = svg.append("path").datum(json).style("fill", "orange").attr("d", arc);
 
 		// Every so often, start a transition to a new random angle. Use //
 		// transition.call // (identical to selection.call) so that we can
@@ -130,10 +118,7 @@ public class ArcTween extends FlowPanel implements DemoCase {
 
 			@Override
 			public void run() {
-				Transition transition =
-						foreground
-								.transition()
-								.duration(750);
+				Transition transition = foreground.transition().duration(750);
 				myFunction(transition, Math.random() * TWO_PI);
 			}
 		};
@@ -151,13 +136,13 @@ public class ArcTween extends FlowPanel implements DemoCase {
 	protected void myFunction(final Transition transition, final double newAngle) {
 		transition.attrTween("d", new TweenFunction<String>() {
 			@Override
-			public Interpolator<String> apply(final Element context, final Value datum, final int index,
-					final Value currentAttributeValue) {
-				final Arc arcDatum = datum.as();
+			public Interpolator<String> apply(final Element context, final Value datum, final int index, final Value currentAttributeValue) {
 				try {
-					double endAngle = arcDatum.endAngle();
-					final Interpolator<Double> interpolator = D3.interpolate(endAngle, newAngle);
-					CallableInterpolator<String> interp = new CallableInterpolator<String>() {
+				final Arc arcDatum = datum.as();
+					final double endAngle = arcDatum.endAngle();
+					return new CallableInterpolator<String>() {
+						private final Interpolator<Double> interpolator = D3.interpolateNumber(endAngle, newAngle);
+
 						@Override
 						public String interpolate(final double t) {
 							double interpolated = interpolator.interpolate(t);
@@ -165,9 +150,7 @@ public class ArcTween extends FlowPanel implements DemoCase {
 							return arc.generate(arcDatum);
 						}
 					};
-					return interp;
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					GWT.log("pas cool", e);
 					throw new IllegalStateException("bug", e);
 				}

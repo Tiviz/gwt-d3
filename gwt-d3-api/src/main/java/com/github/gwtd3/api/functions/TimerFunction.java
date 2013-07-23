@@ -26,40 +26,23 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.github.gwtd3.api.interpolators;
+package com.github.gwtd3.api.functions;
 
 import com.github.gwtd3.api.D3;
-import com.github.gwtd3.api.core.Value;
-
-import com.google.gwt.core.client.JavaScriptObject;
 
 /**
- * An interpolator used when the interpolation function is provided by JSNI.
- * <p>
- * This class is used by {@link D3} to allow java code to invoke built-in
- * interpolators. You should not instanciate this object unless you know what
- * you are doing.
+ * A function to be used with {@link D3#timer()}.
  * <p>
  * 
  * @author <a href="mailto:schiochetanthoni@gmail.com">Anthony Schiochet</a>
  * 
  */
-public class JavascriptFunctionInterpolator extends JavaScriptObject implements Interpolator<Value> {
+public interface TimerFunction {
 
-    protected JavascriptFunctionInterpolator() {
-        super();
-    }
-
-    @Override
-    public final native Value interpolate(final double t)/*-{
-		return {
-			datum : this(t)
-		};
-    }-*/;
-
-    @Override
-    public final JavaScriptObject asJSOFunction() {
-        return this;
-    }
-
+	/**
+	 * Return true to stop the timer, false to continue.
+	 * 
+	 * @return true to stop the timer, false to continue.
+	 */
+	boolean execute();
 }
