@@ -39,10 +39,7 @@ import com.github.gwtd3.demo.client.democases.GeneralUpdatePattern2;
 import com.github.gwtd3.demo.client.democases.GeneralUpdatePattern3;
 import com.github.gwtd3.demo.client.democases.StupidExample;
 import com.github.gwtd3.demo.client.democases.StupidExample2;
-import com.github.gwtd3.demo.client.democases.arcs.ArcDemo;
 import com.github.gwtd3.demo.client.democases.behaviors.DragMultiples;
-import com.github.gwtd3.demo.client.democases.charts.AxisDemo;
-import com.github.gwtd3.demo.client.democases.charts.LineChartDemo;
 import com.github.gwtd3.demo.client.test.ui.TestRunner;
 import com.github.gwtd3.demo.client.test.ui.TestSessionContainer;
 import com.github.gwtd3.demo.client.testcases.D3TestSuite;
@@ -95,7 +92,7 @@ public class D3Demo implements EntryPoint {
         FlowPanel p = new FlowPanel();
         ComplexPanel buttonContainer = new VerticalPanel();
         buttonContainer.add(new TestButton());
-        buttonContainer.add(new DemoButton("Arc", ArcDemo.factory()));
+        // buttonContainer.add(new DemoButton("Arc", ArcDemo.factory()));
         buttonContainer.add(new DemoButton("Stupid example", StupidExample.factory()));
         buttonContainer.add(new DemoButton("Stupid example 2", StupidExample2.factory()));
         buttonContainer.add(new DemoButton("General Update Pattern I", GeneralUpdatePattern1.factory()));
@@ -108,9 +105,6 @@ public class D3Demo implements EntryPoint {
         buttonContainer.add(new DemoButton("Chord diagram", ChordDiagram.factory()));
 
         buttonContainer.add(new DemoButton("Drag Multiples", DragMultiples.factory()));
-        buttonContainer.add(new DemoButton("Axis Demo", AxisDemo.factory()));
-
-        buttonContainer.add(new DemoButton("Line Chart", LineChartDemo.factory()));
 
         p.add(buttonContainer);
         container.addWest(p, 200);

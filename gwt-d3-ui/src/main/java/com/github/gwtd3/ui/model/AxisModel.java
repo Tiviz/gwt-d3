@@ -221,6 +221,10 @@ public class AxisModel<S extends Scale<S>> implements RangeChangeHasHandlers {
         return scale.apply(domainValue).asInt();
     }
 
+    public int pixelRangeLength() {
+        return (int) Math.abs(scale.range().getNumber(0) - scale.range().getNumber(1));
+    }
+
     /**
      * Return the size in pixels of the given domain segment.
      * 
