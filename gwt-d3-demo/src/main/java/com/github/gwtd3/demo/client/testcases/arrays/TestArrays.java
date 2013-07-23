@@ -49,6 +49,7 @@ public class TestArrays extends AbstractTestCase {
 
     @Override
     public void doTest(final ComplexPanel sandbox) {
+		testCreate();
         testLength();
         testGet();
         testSet();
@@ -74,8 +75,11 @@ public class TestArrays extends AbstractTestCase {
 
     }
 
+	private void testCreate() {
+	}
+
     private void testMap() {
-        Array<Integer> fruits = Array.create(5, 20, 31);
+		Array<Integer> fruits = Array.fromInts(5, 20, 31);
         Array<String> result = fruits.map(new ForEachCallback<String>() {
             @Override
             public String forEach(final Object thisArg, final Value element, final int index, final Array<?> array) {
@@ -89,60 +93,60 @@ public class TestArrays extends AbstractTestCase {
     }
 
     private void testSome() {
-        Array<String> fruits = Array.create(5, 20, 72);
+		Array<Integer> fruits = Array.fromInts(5, 20, 72);
         assertTrue(fruits.some(Callbacks.greaterThan(70)));
         assertFalse(fruits.some(Callbacks.greaterThan(73)));
     }
 
     private void testEvery() {
-        Array<String> fruits = Array.create(5, 20, 72);
+		Array<Integer> fruits = Array.fromInts(5, 20, 72);
         assertFalse(fruits.every(Callbacks.greaterThan(10)));
         assertTrue(fruits.every(Callbacks.greaterThan(4)));
     }
 
     private void testUnshift() {
-        Array<String> fruits = Array.create("Banana", "Orange", "Apple");
+		Array<String> fruits = Array.fromObjects("Banana", "Orange", "Apple");
         assertEquals(4, fruits.unshift("Lemon"));
         assertEquals("Lemon,Banana,Orange,Apple", fruits.join());
 
-        fruits = Array.create("Banana", "Orange", "Apple");
+		fruits = Array.fromObjects("Banana", "Orange", "Apple");
         assertEquals(4, fruits.unshift(true));
         assertEquals("true,Banana,Orange,Apple", fruits.join());
 
-        fruits = Array.create("Banana", "Orange", "Apple");
+		fruits = Array.fromObjects("Banana", "Orange", "Apple");
         assertEquals(4, fruits.unshift(5.6));
         assertEquals("5.6,Banana,Orange,Apple", fruits.join());
     }
 
     private void testSplice() {
-        Array<String> fruits = Array.create("Banana", "Orange", "Apple");
+		Array<String> fruits = Array.fromObjects("Banana", "Orange", "Apple");
         Array<String> removed = fruits.splice(1, 1);
         assertEquals("Banana,Apple", fruits.join());
         assertEquals("Orange", removed.join());
 
-        fruits = Array.create("Banana", "Orange", "Apple");
+		fruits = Array.fromObjects("Banana", "Orange", "Apple");
         removed = fruits.splice(-1, 1);
         assertEquals("Banana,Orange", fruits.join());
         assertEquals("Apple", removed.join());
 
-        fruits = Array.create("Banana", "Orange", "Apple");
+		fruits = Array.fromObjects("Banana", "Orange", "Apple");
         removed = fruits.splice(1, 2, "Lemon");
         assertEquals("Banana,Lemon", fruits.join());
         assertEquals("Orange,Apple", removed.join());
 
-        fruits = Array.create("Banana", "Orange", "Apple");
+		fruits = Array.fromObjects("Banana", "Orange", "Apple");
         removed = fruits.splice(1, 0, "Lemon", "Juice");
         assertEquals("Banana,Lemon,Juice,Orange,Apple", fruits.join());
         assertEquals("", removed.join());
     }
 
     private void testSort() {
-        assertEquals("Apple,Banana,Orange", Array.create("Banana", "Orange", "Apple").sortAlphaAsc().join());
-        assertEquals("Orange,Banana,Apple", Array.create("Banana", "Orange", "Apple").sortAlphaDesc().join());
-        assertEquals("23,50,9", Array.create(50, 9, 23).sortAlphaAsc().join());
-        assertEquals("9,50,23", Array.create(50, 9, 23).sortAlphaDesc().join());
-        assertEquals("9,23,50", Array.create(50, 9, 23).sortNumericAsc().join());
-        assertEquals("50,23,9", Array.create(50, 9, 23).sortNumericDesc().join());
+		assertEquals("Apple,Banana,Orange", Array.fromObjects("Banana", "Orange", "Apple").sortAlphaAsc().join());
+		assertEquals("Orange,Banana,Apple", Array.fromObjects("Banana", "Orange", "Apple").sortAlphaDesc().join());
+		assertEquals("23,50,9", Array.fromInts(50, 9, 23).sortAlphaAsc().join());
+		assertEquals("9,50,23", Array.fromInts(50, 9, 23).sortAlphaDesc().join());
+		assertEquals("9,23,50", Array.fromInts(50, 9, 23).sortNumericAsc().join());
+		assertEquals("50,23,9", Array.fromInts(50, 9, 23).sortNumericDesc().join());
     }
 
     private void testSlice() {
@@ -156,7 +160,7 @@ public class TestArrays extends AbstractTestCase {
     }
 
     private void testShift() {
-        Array<?> fruits = Array.create("Banana", true, 5.6);
+		Array<?> fruits = Array.fromObjects("Banana", true, 5.6);
         assertEquals("Banana", fruits.shiftString());
         assertEquals(true, fruits.shiftBoolean());
         assertEquals(5.6, fruits.shiftNumber());
@@ -184,9 +188,7 @@ public class TestArrays extends AbstractTestCase {
     }
 
     private void testSet() {
-        List<String> fruits =
-                new ArrayList<String>(Array.create(Arrays.asList("Banana", "Orange", "Apple", "Mango", "Orange",
-                        "Lemon")));
+		List<String> fruits = new ArrayList<String>(Array.create(Arrays.asList("Banana", "Orange", "Apple", "Mango", "Orange", "Lemon")));
         fruits.set(0, "Other");
         assertEquals(6, fruits.size());
         assertEquals("Other", fruits.get(0));
@@ -210,7 +212,7 @@ public class TestArrays extends AbstractTestCase {
 
     private void testGet() {
         JavaScriptObject obj = JavaScriptObject.createObject();
-        Array<?> fruits = Array.create(true, 5.6, "Apple", obj);
+		Array<?> fruits = Array.fromObjects(true, 5.6, "Apple", obj);
         assertEquals(true, fruits.getBoolean(0));
         assertEquals(5.6, fruits.getNumber(1));
         assertEquals("Apple", fruits.getString(2));
@@ -244,7 +246,7 @@ public class TestArrays extends AbstractTestCase {
     }
 
     private void testFilter() {
-        Array<Integer> array = Array.create(5, 20, 72);
+		Array<Integer> array = Array.fromInts(5, 20, 72);
 
         Array<Integer> filteredArray = array.filter(Callbacks.greaterThan(10));
         assertNotNull(filteredArray);

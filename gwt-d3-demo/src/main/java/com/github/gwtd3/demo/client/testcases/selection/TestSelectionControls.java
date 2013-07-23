@@ -29,8 +29,8 @@
 package com.github.gwtd3.demo.client.testcases.selection;
 
 import com.github.gwtd3.api.D3;
-import com.github.gwtd3.api.core.Value;
 import com.github.gwtd3.api.core.Selection;
+import com.github.gwtd3.api.core.Value;
 import com.github.gwtd3.api.functions.DatumFunction;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.ComplexPanel;
@@ -38,68 +38,68 @@ import com.google.gwt.user.client.ui.Label;
 
 public class TestSelectionControls extends AbstractSelectionTest {
 
-	private static final String ATTRIBUTE = "myattr";
+    private static final String ATTRIBUTE = "myattr";
 
-	@Override
-	public void doTest(final ComplexPanel sandbox) {
-		testEmpty();// 1
-		testNode();// 2
-		testEach();
-		testCount();
-		testCall();
-	}
+    @Override
+    public void doTest(final ComplexPanel sandbox) {
+        testEmpty();// 1
+        testNode();// 2
+        testEach();
+        testCount();
+        testCall();
+    }
 
-	/**
+    /**
 	 * 
 	 */
-	private void testCall() {
-		// nothing to test before any other use cases of using selection.call-
-		// maybe by providing a SelectionCallback interface with one method call(Selection) ?
+    private void testCall() {
+        // nothing to test before any other use cases of using selection.call-
+        // maybe by providing a SelectionCallback interface with one method call(Selection) ?
 
-	}
+    }
 
-	/**
+    /**
 	 * 
 	 */
-	private void testEach() {
-		Selection selection = givenAMultipleSelection(new Label("1"), new Label("2"));
-		final StringBuilder sb = new StringBuilder();
-		selection.each(new DatumFunction<Void>() {
-			@Override
-			public Void apply(final Element context, final Value d, final int index) {
-				sb.append(context.getInnerText());
-				return null;
-			}
-		});
-		assertEquals("12", sb.toString());
-	}
+    private void testEach() {
+        Selection selection = givenAMultipleSelection(new Label("1"), new Label("2"));
+        final StringBuilder sb = new StringBuilder();
+        selection.each(new DatumFunction<Void>() {
+            @Override
+            public Void apply(final Element context, final Value d, final int index) {
+                sb.append(context.getInnerText());
+                return null;
+            }
+        });
+        assertEquals("12", sb.toString());
+    }
 
-	/**
+    /**
 	 * 
 	 */
-	private void testCount() {
-		Selection selection = givenAMultipleSelection(new Label("1"), new Label("2"));
-		assertEquals(2, selection.size());
-	}
+    private void testCount() {
+        Selection selection = givenAMultipleSelection(new Label("1"), new Label("2"));
+        assertEquals(2, selection.size());
+    }
 
-	/**
+    /**
 	 * 
 	 */
-	private void testNode() {
-		Selection selection = givenAMultipleSelection(new Label("1"), new Label("2"));
-		assertEquals("1", selection.node().getInnerText());
-		selection = selection.selectAll("unknown");
-		assertNull(selection.node()); 
-	}
+    private void testNode() {
+        Selection selection = givenAMultipleSelection(new Label("1"), new Label("2"));
+        assertEquals("1", selection.node().getInnerText());
+        selection = selection.selectAll("unknown");
+        assertNull(selection.node());
+    }
 
-	protected void testEmpty() {
-		Selection selection = D3.select(sandbox);
+    protected void testEmpty() {
+        Selection selection = D3.select(sandbox);
 
-		selection.append("myelement");
+        selection.append("myelement");
 
-		assertEquals(false, selection.select("myelement").empty());
-		assertEquals(true, selection.select("unknown").empty());
+        assertEquals(false, selection.select("myelement").empty());
+        assertEquals(true, selection.select("unknown").empty());
 
-	}
+    }
 
 }
